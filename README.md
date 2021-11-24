@@ -4,9 +4,14 @@
 </p>
 <h1 align="center">DimQQ</h1>
 <h3 align="center">一款可自定义强度的QQ for Mac亮度降低工具</h3> 
+<p align="center">
+<img src="./img/donate.png" width="352"/>
+</p>
 
 ## 运行截图
-<img src="./img/Screenshot.png" width=920 align=center />  
+<p align="center">
+<img src="./img/Screenshot.png" width="920"/>  
+</p>
 
 ## 使用
 DimQQ启动后会在菜单栏显示一个图标, 点击图标可对遮罩浓度强度调整.  

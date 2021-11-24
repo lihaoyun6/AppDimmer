@@ -7,15 +7,38 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		187FC80F274D17DD00939612 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 187FC80E274D17DD00939612 /* Credits.rtf */; };
+		187FC817274E4D5B00939612 /* HelperAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 187FC816274E4D5B00939612 /* HelperAppDelegate.swift */; };
+		187FC81B274E4D5D00939612 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 187FC81A274E4D5D00939612 /* Assets.xcassets */; };
+		187FC81E274E4D5D00939612 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 187FC81C274E4D5D00939612 /* Main.storyboard */; };
+		187FC827274E505900939612 /* DimQQLoginHelper.app in CopyFiles */ = {isa = PBXBuildFile; fileRef = 187FC814274E4D5B00939612 /* DimQQLoginHelper.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		187FC829274E7C7100939612 /* Credits.rtfd in Resources */ = {isa = PBXBuildFile; fileRef = 187FC828274E7C7100939612 /* Credits.rtfd */; };
 		18FCCF36274B9317005FF1AD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18FCCF35274B9317005FF1AD /* AppDelegate.swift */; };
 		18FCCF3A274B9318005FF1AD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18FCCF39274B9318005FF1AD /* Assets.xcassets */; };
 		18FCCF3D274B9318005FF1AD /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 18FCCF3B274B9318005FF1AD /* Main.storyboard */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		187FC826274E505300939612 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Contents/Library/LoginItems;
+			dstSubfolderSpec = 1;
+			files = (
+				187FC827274E505900939612 /* DimQQLoginHelper.app in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		187FC80D274CB02300939612 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		187FC80E274D17DD00939612 /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
+		187FC814274E4D5B00939612 /* DimQQLoginHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DimQQLoginHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		187FC816274E4D5B00939612 /* HelperAppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperAppDelegate.swift; sourceTree = "<group>"; };
+		187FC81A274E4D5D00939612 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		187FC81D274E4D5D00939612 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		187FC81F274E4D5D00939612 /* DimQQLoginHelper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DimQQLoginHelper.entitlements; sourceTree = "<group>"; };
+		187FC823274E4E1200939612 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		187FC828274E7C7100939612 /* Credits.rtfd */ = {isa = PBXFileReference; lastKnownFileType = wrapper.rtfd; path = Credits.rtfd; sourceTree = "<group>"; };
 		18FCCF32274B9317005FF1AD /* DimQQ.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DimQQ.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		18FCCF35274B9317005FF1AD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		18FCCF39274B9318005FF1AD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -24,6 +47,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		187FC811274E4D5B00939612 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		18FCCF2F274B9317005FF1AD /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -34,10 +64,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		187FC815274E4D5B00939612 /* DimQQLoginHelper */ = {
+			isa = PBXGroup;
+			children = (
+				187FC823274E4E1200939612 /* Info.plist */,
+				187FC816274E4D5B00939612 /* HelperAppDelegate.swift */,
+				187FC81A274E4D5D00939612 /* Assets.xcassets */,
+				187FC81C274E4D5D00939612 /* Main.storyboard */,
+				187FC81F274E4D5D00939612 /* DimQQLoginHelper.entitlements */,
+			);
+			path = DimQQLoginHelper;
+			sourceTree = "<group>";
+		};
 		18FCCF29274B9317005FF1AD = {
 			isa = PBXGroup;
 			children = (
 				18FCCF34274B9317005FF1AD /* DimQQ */,
+				187FC815274E4D5B00939612 /* DimQQLoginHelper */,
 				18FCCF33274B9317005FF1AD /* Products */,
 			);
 			sourceTree = "<group>";
@@ -46,6 +89,7 @@
 			isa = PBXGroup;
 			children = (
 				18FCCF32274B9317005FF1AD /* DimQQ.app */,
+				187FC814274E4D5B00939612 /* DimQQLoginHelper.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -55,7 +99,7 @@
 			children = (
 				187FC80D274CB02300939612 /* Info.plist */,
 				18FCCF35274B9317005FF1AD /* AppDelegate.swift */,
-				187FC80E274D17DD00939612 /* Credits.rtf */,
+				187FC828274E7C7100939612 /* Credits.rtfd */,
 				18FCCF39274B9318005FF1AD /* Assets.xcassets */,
 				18FCCF3B274B9318005FF1AD /* Main.storyboard */,
 				18FCCF3E274B9318005FF1AD /* DimQQ.entitlements */,
@@ -66,6 +110,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		187FC813274E4D5B00939612 /* DimQQLoginHelper */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 187FC822274E4D5D00939612 /* Build configuration list for PBXNativeTarget "DimQQLoginHelper" */;
+			buildPhases = (
+				187FC810274E4D5B00939612 /* Sources */,
+				187FC811274E4D5B00939612 /* Frameworks */,
+				187FC812274E4D5B00939612 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DimQQLoginHelper;
+			productName = DimQQLoginHelper;
+			productReference = 187FC814274E4D5B00939612 /* DimQQLoginHelper.app */;
+			productType = "com.apple.product-type.application";
+		};
 		18FCCF31274B9317005FF1AD /* DimQQ */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 18FCCF57274B9318005FF1AD /* Build configuration list for PBXNativeTarget "DimQQ" */;
@@ -73,6 +134,7 @@
 				18FCCF2E274B9317005FF1AD /* Sources */,
 				18FCCF2F274B9317005FF1AD /* Frameworks */,
 				18FCCF30274B9317005FF1AD /* Resources */,
+				187FC826274E505300939612 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -93,6 +155,9 @@
 				LastSwiftUpdateCheck = 1310;
 				LastUpgradeCheck = 1310;
 				TargetAttributes = {
+					187FC813274E4D5B00939612 = {
+						CreatedOnToolsVersion = 13.1;
+					};
 					18FCCF31274B9317005FF1AD = {
 						CreatedOnToolsVersion = 13.1;
 					};
@@ -112,17 +177,27 @@
 			projectRoot = "";
 			targets = (
 				18FCCF31274B9317005FF1AD /* DimQQ */,
+				187FC813274E4D5B00939612 /* DimQQLoginHelper */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		187FC812274E4D5B00939612 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				187FC81B274E4D5D00939612 /* Assets.xcassets in Resources */,
+				187FC81E274E4D5D00939612 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		18FCCF30274B9317005FF1AD /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				187FC829274E7C7100939612 /* Credits.rtfd in Resources */,
 				18FCCF3A274B9318005FF1AD /* Assets.xcassets in Resources */,
-				187FC80F274D17DD00939612 /* Credits.rtf in Resources */,
 				18FCCF3D274B9318005FF1AD /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -130,6 +205,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		187FC810274E4D5B00939612 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				187FC817274E4D5B00939612 /* HelperAppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		18FCCF2E274B9317005FF1AD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -141,6 +224,14 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
+		187FC81C274E4D5D00939612 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				187FC81D274E4D5D00939612 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
 		18FCCF3B274B9318005FF1AD /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -152,6 +243,64 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		187FC820274E4D5D00939612 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = DimQQLoginHelper/DimQQLoginHelper.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = L4T783637F;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DimQQLoginHelper/Info.plist;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.2.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.DimQQLoginHelper;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		187FC821274E4D5D00939612 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = DimQQLoginHelper/DimQQLoginHelper.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = L4T783637F;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DimQQLoginHelper/Info.plist;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.2.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.DimQQLoginHelper;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 		18FCCF55274B9318005FF1AD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -276,11 +425,12 @@
 				CODE_SIGN_ENTITLEMENTS = DimQQ/DimQQ.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = L4T783637F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DimQQ/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2021 lihaoyun6. All rights reserved.";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -289,8 +439,8 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.2.1;
-				PRODUCT_BUNDLE_IDENTIFIER = lihaoyun6.DimQQ;
+				MARKETING_VERSION = 0.2.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.DimQQ;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -306,11 +456,12 @@
 				CODE_SIGN_ENTITLEMENTS = DimQQ/DimQQ.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = L4T783637F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DimQQ/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2021 lihaoyun6. All rights reserved.";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -319,8 +470,8 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.2.1;
-				PRODUCT_BUNDLE_IDENTIFIER = lihaoyun6.DimQQ;
+				MARKETING_VERSION = 0.2.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.DimQQ;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -330,6 +481,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		187FC822274E4D5D00939612 /* Build configuration list for PBXNativeTarget "DimQQLoginHelper" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				187FC820274E4D5D00939612 /* Debug */,
+				187FC821274E4D5D00939612 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		18FCCF2D274B9317005FF1AD /* Build configuration list for PBXProject "DimQQ" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
