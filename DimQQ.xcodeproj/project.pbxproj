@@ -7,11 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		183A3626274F4DF60001A80D /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 183A3628274F4DF60001A80D /* Localizable.strings */; };
+		183A362C274F53050001A80D /* Credits.rtfd in Resources */ = {isa = PBXBuildFile; fileRef = 183A362E274F53050001A80D /* Credits.rtfd */; };
 		187FC817274E4D5B00939612 /* HelperAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 187FC816274E4D5B00939612 /* HelperAppDelegate.swift */; };
 		187FC81B274E4D5D00939612 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 187FC81A274E4D5D00939612 /* Assets.xcassets */; };
 		187FC81E274E4D5D00939612 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 187FC81C274E4D5D00939612 /* Main.storyboard */; };
 		187FC827274E505900939612 /* DimQQLoginHelper.app in CopyFiles */ = {isa = PBXBuildFile; fileRef = 187FC814274E4D5B00939612 /* DimQQLoginHelper.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		187FC829274E7C7100939612 /* Credits.rtfd in Resources */ = {isa = PBXBuildFile; fileRef = 187FC828274E7C7100939612 /* Credits.rtfd */; };
 		18FCCF36274B9317005FF1AD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18FCCF35274B9317005FF1AD /* AppDelegate.swift */; };
 		18FCCF3A274B9318005FF1AD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18FCCF39274B9318005FF1AD /* Assets.xcassets */; };
 		18FCCF3D274B9318005FF1AD /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 18FCCF3B274B9318005FF1AD /* Main.storyboard */; };
@@ -31,6 +32,15 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		183A3627274F4DF60001A80D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		183A362A274F4E040001A80D /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		183A362B274F4E110001A80D /* zh-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-HK"; path = "zh-HK.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		183A362D274F53050001A80D /* Base */ = {isa = PBXFileReference; lastKnownFileType = wrapper.rtfd; name = Base; path = Base.lproj/Credits.rtfd; sourceTree = "<group>"; };
+		183A362F274F53080001A80D /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.rtfd; name = en; path = en.lproj/Credits.rtfd; sourceTree = "<group>"; };
+		183A3630274F530C0001A80D /* zh-HK */ = {isa = PBXFileReference; lastKnownFileType = wrapper.rtfd; name = "zh-HK"; path = "zh-HK.lproj/Credits.rtfd"; sourceTree = "<group>"; };
+		183A3632274F530D0001A80D /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = wrapper.rtfd; name = "zh-Hant"; path = "zh-Hant.lproj/Credits.rtfd"; sourceTree = "<group>"; };
+		183A3635274F5B510001A80D /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = wrapper.rtfd; name = "zh-Hans"; path = "zh-Hans.lproj/Credits.rtfd"; sourceTree = "<group>"; };
+		183A3636274F5B990001A80D /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		187FC80D274CB02300939612 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		187FC814274E4D5B00939612 /* DimQQLoginHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DimQQLoginHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		187FC816274E4D5B00939612 /* HelperAppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperAppDelegate.swift; sourceTree = "<group>"; };
@@ -38,7 +48,6 @@
 		187FC81D274E4D5D00939612 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		187FC81F274E4D5D00939612 /* DimQQLoginHelper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DimQQLoginHelper.entitlements; sourceTree = "<group>"; };
 		187FC823274E4E1200939612 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		187FC828274E7C7100939612 /* Credits.rtfd */ = {isa = PBXFileReference; lastKnownFileType = wrapper.rtfd; path = Credits.rtfd; sourceTree = "<group>"; };
 		18FCCF32274B9317005FF1AD /* DimQQ.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DimQQ.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		18FCCF35274B9317005FF1AD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		18FCCF39274B9318005FF1AD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -99,7 +108,8 @@
 			children = (
 				187FC80D274CB02300939612 /* Info.plist */,
 				18FCCF35274B9317005FF1AD /* AppDelegate.swift */,
-				187FC828274E7C7100939612 /* Credits.rtfd */,
+				183A362E274F53050001A80D /* Credits.rtfd */,
+				183A3628274F4DF60001A80D /* Localizable.strings */,
 				18FCCF39274B9318005FF1AD /* Assets.xcassets */,
 				18FCCF3B274B9318005FF1AD /* Main.storyboard */,
 				18FCCF3E274B9318005FF1AD /* DimQQ.entitlements */,
@@ -170,6 +180,9 @@
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hans",
+				"zh-Hant",
+				"zh-HK",
 			);
 			mainGroup = 18FCCF29274B9317005FF1AD;
 			productRefGroup = 18FCCF33274B9317005FF1AD /* Products */;
@@ -196,7 +209,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				187FC829274E7C7100939612 /* Credits.rtfd in Resources */,
+				183A362C274F53050001A80D /* Credits.rtfd in Resources */,
+				183A3626274F4DF60001A80D /* Localizable.strings in Resources */,
 				18FCCF3A274B9318005FF1AD /* Assets.xcassets in Resources */,
 				18FCCF3D274B9318005FF1AD /* Main.storyboard in Resources */,
 			);
@@ -224,6 +238,29 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
+		183A3628274F4DF60001A80D /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				183A3627274F4DF60001A80D /* en */,
+				183A362A274F4E040001A80D /* zh-Hant */,
+				183A362B274F4E110001A80D /* zh-HK */,
+				183A3636274F5B990001A80D /* zh-Hans */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		183A362E274F53050001A80D /* Credits.rtfd */ = {
+			isa = PBXVariantGroup;
+			children = (
+				183A362D274F53050001A80D /* Base */,
+				183A362F274F53080001A80D /* en */,
+				183A3630274F530C0001A80D /* zh-HK */,
+				183A3632274F530D0001A80D /* zh-Hant */,
+				183A3635274F5B510001A80D /* zh-Hans */,
+			);
+			name = Credits.rtfd;
+			sourceTree = "<group>";
+		};
 		187FC81C274E4D5D00939612 /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -263,6 +300,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 0.2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.DimQQLoginHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -292,6 +330,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 0.2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.DimQQLoginHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -305,6 +344,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
@@ -366,6 +406,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
@@ -425,7 +466,7 @@
 				CODE_SIGN_ENTITLEMENTS = DimQQ/DimQQ.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = L4T783637F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -439,7 +480,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.2.2;
+				MARKETING_VERSION = 0.2.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.DimQQ;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -456,7 +497,7 @@
 				CODE_SIGN_ENTITLEMENTS = DimQQ/DimQQ.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = L4T783637F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -470,7 +511,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.2.2;
+				MARKETING_VERSION = 0.2.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.DimQQ;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

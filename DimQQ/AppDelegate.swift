@@ -90,7 +90,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             UserDefaults.standard.set(level, forKey: "level")
         case .leftMouseDragged, .rightMouseDragged:
             level = Int(100-slider.intValue)
-            maskWindow.title = "亮度: \(slider.intValue)%"
+            maskWindow.title = "\(slider.intValue)%"
         default:
             break
         }
@@ -128,7 +128,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func setChannel(_ sender: NSMenuItem) {
         channel.toggle()
         menu.item(withTitle: sender.title)?.state = state(channel)
-        if channel { text2 = "QQ频道" } else { text2 = "QQ" }
+        if channel { text2 = local("QQ频道") } else { text2 = "QQ" }
         UserDefaults.standard.set(channel, forKey: "channel")
         lastNormalBound = NSZeroRect
     }
@@ -148,17 +148,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(withTitle: "启用 DimQQ", action: #selector(setDisable(_:)), keyEquivalent: "").state = state(!disable)
-        menu.addItem(withTitle: "登录时启动", action: #selector(setRunAtLogin(_:)), keyEquivalent: "").state = state(foundHelper)
+        menu.addItem(withTitle: local("启用 DimQQ"), action: #selector(setDisable(_:)), keyEquivalent: "").state = state(!disable)
+        menu.addItem(withTitle: local("登录时启动"), action: #selector(setRunAtLogin(_:)), keyEquivalent: "").state = state(foundHelper)
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(withTitle: "仅在深色模式生效", action: #selector(setDarkOnly(_:)), keyEquivalent: "").state = state(darkOnly)
-        menu.addItem(withTitle: "作用于频道(实验性)", action: #selector(setChannel(_:)), keyEquivalent: "").state = state(channel)
-        if channel { text2 = "QQ频道" }
+        menu.addItem(withTitle: local("仅在深色模式生效"), action: #selector(setDarkOnly(_:)), keyEquivalent: "").state = state(darkOnly)
+        menu.addItem(withTitle: local("包含QQ频道(实验性)"), action: #selector(setChannel(_:)), keyEquivalent: "").state = state(channel)
+        if channel { text2 = local("QQ频道") }
         
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(withTitle: "赞助一瓶快乐水", action: #selector(aboutDialog(_:)), keyEquivalent: "")
-        menu.addItem(withTitle: "关于 DimQQ", action: #selector(aboutDialog(_:)), keyEquivalent: "")
-        menu.addItem(withTitle: "退出", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "")
+        menu.addItem(withTitle: local("赞助一瓶快乐水"), action: #selector(aboutDialog(_:)), keyEquivalent: "")
+        menu.addItem(withTitle: local("关于 DimQQ"), action: #selector(aboutDialog(_:)), keyEquivalent: "")
+        menu.addItem(withTitle: local("退出"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "")
         statusItem.menu = menu
         
         let menuSliderItem = NSMenuItem()
@@ -212,6 +212,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         lastNormalBound = NSZeroRect
     }
     
+    //本地化字符串
+    func local(_ string: String) -> String{
+        NSLocalizedString(string, comment: "")
+    }
+    
     //窗口生成及动态跟踪函数
     @objc func loopFireHandler(_ timer: Timer?) -> Void {
         //检测启动条件
@@ -245,10 +250,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 //设置叠层透明度
                 maskWindow.backgroundColor = NSColor(white: 0.0, alpha: CGFloat(level)/100)
                 //获取最顶层可见窗口所属的App名称
-                if let frontApp = visibleWindows.first{
-                    let frontAppName = frontApp[kCGWindowOwnerName as String] as! String
+                if let frontVisibleApp = visibleWindows.first{
+                    let frontVisibleAppName = frontVisibleApp[kCGWindowOwnerName as String] as! String
+                    //let frontAppID = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
                     //如果是QQ(或频道)
-                    if frontAppName == "QQ" || frontAppName == text2{
+                    if frontVisibleAppName == "QQ" || frontVisibleAppName == text2{
                         //如果窗口数量不为0(防止窗口都关了, 但是App保持运行的情况)
                         if QQBounds.count != 0 {
                             //获取需要绘制的区域
@@ -292,7 +298,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     hideMask()
                 }
             } else {
-                alert("出现错误", "无法获取窗口列表!", "退出")
+                alert(local("出现错误"), local("无法获取窗口列表!"), local("退出"))
                 NSApplication.shared.terminate(self)
             }
         }else{

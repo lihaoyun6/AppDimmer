@@ -20,11 +20,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         if !isRunning {
-            var path = Bundle.main.bundlePath as NSString
+            var url = Bundle.main.bundleURL
             for _ in 1...4 {
-                path = path.deletingLastPathComponent as NSString
+                url = url.deletingLastPathComponent()
             }
-            NSWorkspace.shared.launchApplication(path as String)
+            NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration(), completionHandler: nil)
         }
     }
 
