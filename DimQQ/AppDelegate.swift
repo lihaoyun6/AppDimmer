@@ -59,12 +59,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         mainMenu()
         
         //初始化叠层属性(部分)
+        
         QQMaskWindow.isOpaque = false
         QQMaskWindow.ignoresMouseEvents = true
         QQMaskWindow.titlebarAppearsTransparent = true
+        QQMaskWindow.hasShadow = false
         channelMaskWindow.isOpaque = false
         channelMaskWindow.ignoresMouseEvents = true
         channelMaskWindow.titlebarAppearsTransparent = true
+        channelMaskWindow.hasShadow = false
         
         //初始化定时器
         timer = Timer(timeInterval: 0.05, repeats: true, block: {timer in self.loopFireHandler(timer)})
