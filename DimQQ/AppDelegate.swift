@@ -19,23 +19,27 @@ class NNSWindow : NSWindow {
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
     
-    @IBOutlet weak var window: NSWindow!
-    
     var timer: Timer?
     var lastNormalBound : NSRect?
+    var lastNormalBound2 : NSRect?
     var menuSlider = NSSlider()
     var cold = true
-    var text2 = "QQ"
+    var cold2 = true
+    var channelName = NSLocalizedString("QQ频道", comment: "")
     var level = UserDefaults.standard.integer(forKey: "level")
     var disable = UserDefaults.standard.bool(forKey: "disable")
     var darkOnly = UserDefaults.standard.bool(forKey: "darkOnly")
-    var channel = UserDefaults.standard.bool(forKey: "channel")
+    //var channel = UserDefaults.standard.bool(forKey: "channel")
     var statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.variableLength)
     
     let menu = NSMenu()
     var foundHelper = false
     let helperBundleName = "com.lihaoyun6.DimQQLoginHelper"
-    let maskWindow = NNSWindow(contentRect: .init(origin: .zero, size: .init(width: NSScreen.main!.frame.midX, height: NSScreen.main!.frame.midY)),
+    let QQMaskWindow = NNSWindow(contentRect: .init(origin: .zero, size: .init(width: NSScreen.main!.frame.midX, height: NSScreen.main!.frame.midY)),
+                             styleMask: [.titled],
+                             backing: .buffered,
+                             defer: false)
+    let channelMaskWindow = NNSWindow(contentRect: .init(origin: .zero, size: .init(width: NSScreen.main!.frame.midX, height: NSScreen.main!.frame.midY)),
                              styleMask: [.titled],
                              backing: .buffered,
                              defer: false)
@@ -51,17 +55,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             UserDefaults.standard.set(level, forKey: "level")
         }
         
-        //初始化定时器
-        timer = Timer(timeInterval: 0.05, repeats: true, block: {timer in self.loopFireHandler(timer)})
-        RunLoop.main.add(timer!, forMode: .common)
-        
         //生成主菜单
         mainMenu()
         
         //初始化叠层属性(部分)
-        maskWindow.isOpaque = false
-        maskWindow.ignoresMouseEvents = true
-        maskWindow.titlebarAppearsTransparent = true
+        QQMaskWindow.isOpaque = false
+        QQMaskWindow.ignoresMouseEvents = true
+        QQMaskWindow.titlebarAppearsTransparent = true
+        channelMaskWindow.isOpaque = false
+        channelMaskWindow.ignoresMouseEvents = true
+        channelMaskWindow.titlebarAppearsTransparent = true
+        
+        //初始化定时器
+        timer = Timer(timeInterval: 0.05, repeats: true, block: {timer in self.loopFireHandler(timer)})
+        RunLoop.main.add(timer!, forMode: .common)
     }
     
     func applicationWillTerminate(_ aNotification: Notification) {
@@ -86,11 +93,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         case .leftMouseDown, .rightMouseDown:
             break
         case .leftMouseUp, .rightMouseUp:
-            maskWindow.title = ""
+            QQMaskWindow.title = ""
+            channelMaskWindow.title = ""
             UserDefaults.standard.set(level, forKey: "level")
         case .leftMouseDragged, .rightMouseDragged:
             level = Int(100-slider.intValue)
-            maskWindow.title = "\(slider.intValue)%"
+            QQMaskWindow.title = "\(slider.intValue)%"
+            channelMaskWindow.title = "\(slider.intValue)%"
         default:
             break
         }
@@ -114,6 +123,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.item(withTitle: sender.title)?.state = state(!disable)
         UserDefaults.standard.set(disable, forKey: "disable")
         lastNormalBound = NSZeroRect
+        lastNormalBound2 = NSZeroRect
     }
     
     //设置"仅在深色模式生效"
@@ -122,16 +132,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.item(withTitle: sender.title)?.state = state(darkOnly)
         UserDefaults.standard.set(darkOnly, forKey: "darkOnly")
         lastNormalBound = NSZeroRect
+        lastNormalBound2 = NSZeroRect
     }
     
-    //设置"作用于频道(实验性)"
+    /*设置"作用于频道(实验性)"
     @objc func setChannel(_ sender: NSMenuItem) {
         channel.toggle()
         menu.item(withTitle: sender.title)?.state = state(channel)
-        if channel { text2 = local("QQ频道") } else { text2 = "QQ" }
         UserDefaults.standard.set(channel, forKey: "channel")
         lastNormalBound = NSZeroRect
-    }
+        lastNormalBound2 = NSZeroRect
+    }*/
     
     //设置"登录时启动"
     @objc func setRunAtLogin(_ sender: NSMenuItem) {
@@ -150,10 +161,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(NSMenuItem.separator())
         menu.addItem(withTitle: local("启用 DimQQ"), action: #selector(setDisable(_:)), keyEquivalent: "").state = state(!disable)
         menu.addItem(withTitle: local("登录时启动"), action: #selector(setRunAtLogin(_:)), keyEquivalent: "").state = state(foundHelper)
-        menu.addItem(NSMenuItem.separator())
-        menu.addItem(withTitle: local("仅在深色模式生效"), action: #selector(setDarkOnly(_:)), keyEquivalent: "").state = state(darkOnly)
-        menu.addItem(withTitle: local("包含QQ频道(实验性)"), action: #selector(setChannel(_:)), keyEquivalent: "").state = state(channel)
-        if channel { text2 = local("QQ频道") }
+        //menu.addItem(NSMenuItem.separator())
+        menu.addItem(withTitle: local("仅在深色模式启用"), action: #selector(setDarkOnly(_:)), keyEquivalent: "").state = state(darkOnly)
+        //menu.addItem(withTitle: local("包含QQ频道(实验性)"), action: #selector(setChannel(_:)), keyEquivalent: "").state = state(channel)
+        //if channel { channelName = local("QQ频道") }
         
         menu.addItem(NSMenuItem.separator())
         menu.addItem(withTitle: local("赞助一瓶快乐水"), action: #selector(aboutDialog(_:)), keyEquivalent: "")
@@ -208,13 +219,106 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     //隐藏窗口
     func hideMask(){
-        maskWindow.orderOut(self)
+        QQMaskWindow.orderOut(self)
         lastNormalBound = NSZeroRect
+    }
+    
+    func hideChannelMask(){
+        channelMaskWindow.orderOut(self)
+        lastNormalBound2 = NSZeroRect
     }
     
     //本地化字符串
     func local(_ string: String) -> String{
         NSLocalizedString(string, comment: "")
+    }
+    
+    func createQQMask(_ frontVisibleAppName: String, _ QQBounds: [NSRect]){
+        if frontVisibleAppName == "QQ"{
+            //如果窗口数量不为0(防止窗口都关了, 但是App保持运行的情况)
+            if QQBounds.count != 0 {
+                //获取需要绘制的区域
+                let bound = getMaxBound(QQBounds)
+                //设置窗口属性
+                QQMaskWindow.styleMask = .titled
+                QQMaskWindow.level = NSWindow.Level.floating
+                for screen in NSScreen.screens {
+                    if NSEqualRects(screen.frame,bound) { QQMaskWindow.styleMask = .borderless }
+                }
+                QQMaskWindow.setFrame(bound, display: true)
+                QQMaskWindow.makeKeyAndOrderFront(self)
+                //记录当前窗口区域信息, 以供下次对比
+                lastNormalBound = NSZeroRect
+                //修改冷启动标志
+                if cold {cold.toggle()}
+            }else{
+                //如果窗口数量为0, 则不显示叠层
+                hideMask()
+            }
+        }else{
+            //如果顶层窗口不是QQ, 且不是冷启动
+            if QQBounds.count != 0 && !cold {
+                let bound = getMaxBound(QQBounds)
+                //检测窗口移动或缩放过才修改叠层属性, 防止闪烁
+                if bound != lastNormalBound!{
+                    QQMaskWindow.setFrame(bound, display: true)
+                    QQMaskWindow.level = NSWindow.Level.normal
+                    QQMaskWindow.orderOut(self)
+                    QQMaskWindow.makeKeyAndOrderFront(self)
+                    lastNormalBound = bound
+                }
+            }else{
+                //如果窗口数量为0, 则不显示叠层
+                hideMask()
+            }
+        }
+    }
+    
+    func createChannelMask(_ frontVisibleAppName: String, _ channelBounds: [NSRect]){
+        //if channel{
+            //如果是QQ频道
+            if frontVisibleAppName == channelName{
+                //如果窗口数量不为0(防止窗口都关了, 但是App保持运行的情况)
+                if channelBounds.count != 0 {
+                    //获取需要绘制的区域
+                    let bound = getMaxBound(channelBounds)
+                    //设置窗口属性
+                    channelMaskWindow.styleMask = .titled
+                    channelMaskWindow.level = NSWindow.Level.floating
+                    for screen in NSScreen.screens {
+                        if NSEqualRects(screen.frame,bound) { channelMaskWindow.styleMask = .borderless }
+                    }
+                    channelMaskWindow.setFrame(bound, display: true)
+                    channelMaskWindow.makeKeyAndOrderFront(self)
+                    //记录当前窗口区域信息, 以供下次对比
+                    lastNormalBound2 = NSZeroRect
+                    //修改冷启动标志
+                    if cold2 {cold2.toggle()}
+                }else{
+                    //如果窗口数量为0, 则不显示叠层
+                    hideChannelMask()
+                }
+            }else{
+                //如果顶层窗口不是QQ频道, 且不是冷启动
+                if channelBounds.count != 0 && !cold2 {
+                    //计算可视范围内的有效绘制区域信息
+                    let bound = getMaxBound(channelBounds)
+                    //检测窗口移动或缩放过才修改叠层属性, 防止闪烁
+                    if bound != lastNormalBound2!{
+                        channelMaskWindow.setFrame(bound, display: true)
+                        channelMaskWindow.level = NSWindow.Level.normal
+                        channelMaskWindow.orderOut(self)
+                        channelMaskWindow.makeKeyAndOrderFront(self)
+                        lastNormalBound2 = bound
+                    }
+                }else{
+                    //如果窗口数量为0, 则不显示叠层
+                    hideChannelMask()
+                }
+            }
+        //}else{
+        //    hideChannelMask()
+        //}
     }
     
     //窗口生成及动态跟踪函数
@@ -223,6 +327,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if isDarkMode() && !disable && level != 1 {
             //声明QQ窗口区域列表
             var QQBounds = [NSRect]()
+            var channelBounds = [NSRect]()
             //检测当前屏幕上所有的可见窗口
             if let windowList = CGWindowListCopyWindowInfo([.excludeDesktopElements,.optionOnScreenOnly], kCGNullWindowID) as? [[String: AnyObject]] {
                 let visibleWindows = windowList.filter{ $0["kCGWindowLayer"] as! Int == 0 }
@@ -230,9 +335,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     //获取窗口所属App名称
                     let owner = window[kCGWindowOwnerName as String] as! String
                     //获取所需的窗口区域信息
-                    if owner == "QQ"||owner == text2 {
+                    if owner == "QQ" {
                         let bound = CGRect(dictionaryRepresentation: window[kCGWindowBounds as String] as! CFDictionary)!
                         if bound.size.width >= 240.0 && bound.size.height >= 300.0 { QQBounds.append(CGtoNS(bound)) }
+                    }else if owner == channelName{
+                        let bound = CGRect(dictionaryRepresentation: window[kCGWindowBounds as String] as! CFDictionary)!
+                        if bound.size.width >= 240.0 && bound.size.height >= 300.0 { channelBounds.append(CGtoNS(bound)) }
                     }
                 }
                 
@@ -248,54 +356,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }*/
                 
                 //设置叠层透明度
-                maskWindow.backgroundColor = NSColor(white: 0.0, alpha: CGFloat(level)/100)
+                QQMaskWindow.backgroundColor = NSColor(white: 0.0, alpha: CGFloat(level)/100)
+                channelMaskWindow.backgroundColor = NSColor(white: 0.0, alpha: CGFloat(level)/100)
                 //获取最顶层可见窗口所属的App名称
                 if let frontVisibleApp = visibleWindows.first{
                     let frontVisibleAppName = frontVisibleApp[kCGWindowOwnerName as String] as! String
-                    //let frontAppID = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
-                    //如果是QQ(或频道)
-                    if frontVisibleAppName == "QQ" || frontVisibleAppName == text2{
-                        //如果窗口数量不为0(防止窗口都关了, 但是App保持运行的情况)
-                        if QQBounds.count != 0 {
-                            //获取需要绘制的区域
-                            let bound = getMaxBound(QQBounds)
-                            //设置窗口属性
-                            maskWindow.styleMask = .titled
-                            maskWindow.level = NSWindow.Level.floating
-                            for screen in NSScreen.screens {
-                                if NSEqualRects(screen.frame,bound) { maskWindow.styleMask = .borderless }
-                            }
-                            maskWindow.setFrame(bound, display: true)
-                            maskWindow.makeKeyAndOrderFront(self)
-                            //记录当前窗口区域信息, 以供下次对比
-                            lastNormalBound = NSZeroRect
-                            //修改冷启动标志
-                            if cold {cold.toggle()}
-                        }else{
-                            //如果窗口数量为0, 则不显示叠层
-                            hideMask()
-                        }
-                    }else{
-                        //如果顶层窗口不是QQ(或频道), 且不是冷启动
-                        if QQBounds.count != 0 && !cold {
-                            //计算可视范围内的有效绘制区域信息
-                            //let bound = NSIntersectionRect(NSScreen.main!.visibleFrame,getMaxBound(QQBounds))
-                            let bound = getMaxBound(QQBounds)
-                            //检测窗口移动或缩放过才修改叠层属性, 防止闪烁
-                            if bound != lastNormalBound!{
-                                maskWindow.setFrame(bound, display: true)
-                                maskWindow.level = NSWindow.Level.normal
-                                maskWindow.orderOut(self)
-                                maskWindow.makeKeyAndOrderFront(self)
-                                lastNormalBound = bound
-                            }
-                        }else{
-                            //如果窗口数量为0, 则不显示叠层
-                            hideMask()
-                        }
-                    }
+                    createQQMask(frontVisibleAppName, QQBounds)
+                    createChannelMask(frontVisibleAppName, channelBounds)
                 }else{
                     hideMask()
+                    hideChannelMask()
                 }
             } else {
                 alert(local("出现错误"), local("无法获取窗口列表!"), local("退出"))
@@ -303,7 +373,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }else{
             hideMask()
+            hideChannelMask()
         }
     }
 }
+
 
