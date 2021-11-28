@@ -123,8 +123,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func setDisable(_ sender: NSMenuItem) {
         disable.toggle()
         menuSlider.isEnabled = !disable
+        menuIcon()
         menu.item(withTitle: sender.title)?.state = state(!disable)
         UserDefaults.standard.set(disable, forKey: "disable")
+        cold = !disable
+        cold2 = !disable
         lastNormalBound = NSZeroRect
         lastNormalBound2 = NSZeroRect
     }
@@ -154,12 +157,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.item(withTitle: sender.title)?.state = state(foundHelper)
     }
     
-    //主菜单生成函数
-    func mainMenu(){
+    //初始化菜单栏按钮
+    func menuIcon(){
         //初始化菜单栏按钮
         if let button = statusItem.button {
-            button.image = NSImage(named:NSImage.Name("MenuBarIcon"))
+            if !disable{
+                button.image = NSImage(named:NSImage.Name("MenuBarIcon"))
+            }else{
+                button.image = NSImage(named:NSImage.Name("MenuBarIcon_Disable"))
+            }
         }
+    }
+    
+    //主菜单生成函数
+    func mainMenu(){
+        menuIcon()
         
         menu.addItem(NSMenuItem.separator())
         menu.addItem(withTitle: local("启用 DimQQ"), action: #selector(setDisable(_:)), keyEquivalent: "").state = state(!disable)
