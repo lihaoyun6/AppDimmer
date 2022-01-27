@@ -375,7 +375,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 channelMaskWindow.backgroundColor = NSColor(white: 0.0, alpha: CGFloat(level)/100)
                 //获取最顶层可见窗口所属的App名称
                 if let frontVisibleApp = visibleWindows.first{
-                    let frontVisibleAppName = frontVisibleApp[kCGWindowOwnerName as String] as! String
+                    var frontVisibleAppName = frontVisibleApp[kCGWindowOwnerName as String] as! String
+                    if frontVisibleAppName == "Window Server" {
+                        let frontVisibleApp = visibleWindows[1]
+                        frontVisibleAppName = frontVisibleApp[kCGWindowOwnerName as String] as! String
+                    }
                     createQQMask(frontVisibleAppName, QQBounds)
                     createChannelMask(frontVisibleAppName, channelBounds)
                 }else{
