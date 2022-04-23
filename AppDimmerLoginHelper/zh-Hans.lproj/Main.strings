@@ -2,8 +2,8 @@
 /* Class = "NSMenuItem"; title = "Customize Toolbar…"; ObjectID = "1UK-8n-QPP"; */
 "1UK-8n-QPP.title" = "Customize Toolbar…";
 
-/* Class = "NSMenuItem"; title = "DimQQLoginHelper"; ObjectID = "1Xt-HY-uBw"; */
-"1Xt-HY-uBw.title" = "DimQQLoginHelper";
+/* Class = "NSMenuItem"; title = "AppDimmerLoginHelper"; ObjectID = "1Xt-HY-uBw"; */
+"1Xt-HY-uBw.title" = "AppDimmerLoginHelper";
 
 /* Class = "NSMenu"; title = "Find"; ObjectID = "1b7-l0-nxx"; */
 "1b7-l0-nxx.title" = "Find";
@@ -35,8 +35,8 @@
 /* Class = "NSMenuItem"; title = "Enter Full Screen"; ObjectID = "4J7-dP-txa"; */
 "4J7-dP-txa.title" = "Enter Full Screen";
 
-/* Class = "NSMenuItem"; title = "Quit DimQQLoginHelper"; ObjectID = "4sb-4s-VLi"; */
-"4sb-4s-VLi.title" = "Quit DimQQLoginHelper";
+/* Class = "NSMenuItem"; title = "Quit AppDimmerLoginHelper"; ObjectID = "4sb-4s-VLi"; */
+"4sb-4s-VLi.title" = "Quit AppDimmerLoginHelper";
 
 /* Class = "NSMenuItem"; title = "Edit"; ObjectID = "5QF-Oa-p0T"; */
 "5QF-Oa-p0T.title" = "Edit";
@@ -44,8 +44,8 @@
 /* Class = "NSMenuItem"; title = "Copy Style"; ObjectID = "5Vv-lz-BsD"; */
 "5Vv-lz-BsD.title" = "Copy Style";
 
-/* Class = "NSMenuItem"; title = "About DimQQLoginHelper"; ObjectID = "5kV-Vb-QxS"; */
-"5kV-Vb-QxS.title" = "About DimQQLoginHelper";
+/* Class = "NSMenuItem"; title = "About AppDimmerLoginHelper"; ObjectID = "5kV-Vb-QxS"; */
+"5kV-Vb-QxS.title" = "About AppDimmerLoginHelper";
 
 /* Class = "NSMenuItem"; title = "Redo"; ObjectID = "6dh-zS-Vam"; */
 "6dh-zS-Vam.title" = "Redo";
@@ -83,8 +83,8 @@
 /* Class = "NSMenu"; title = "Help"; ObjectID = "F2S-fz-NVQ"; */
 "F2S-fz-NVQ.title" = "Help";
 
-/* Class = "NSMenuItem"; title = "DimQQLoginHelper Help"; ObjectID = "FKE-Sm-Kum"; */
-"FKE-Sm-Kum.title" = "DimQQLoginHelper Help";
+/* Class = "NSMenuItem"; title = "AppDimmerLoginHelper Help"; ObjectID = "FKE-Sm-Kum"; */
+"FKE-Sm-Kum.title" = "AppDimmerLoginHelper Help";
 
 /* Class = "NSMenuItem"; title = "Text"; ObjectID = "Fal-I4-PZk"; */
 "Fal-I4-PZk.title" = "Text";
@@ -161,8 +161,8 @@
 /* Class = "NSMenuItem"; title = "Baseline"; ObjectID = "OaQ-X3-Vso"; */
 "OaQ-X3-Vso.title" = "Baseline";
 
-/* Class = "NSMenuItem"; title = "Hide DimQQLoginHelper"; ObjectID = "Olw-nP-bQN"; */
-"Olw-nP-bQN.title" = "Hide DimQQLoginHelper";
+/* Class = "NSMenuItem"; title = "Hide AppDimmerLoginHelper"; ObjectID = "Olw-nP-bQN"; */
+"Olw-nP-bQN.title" = "Hide AppDimmerLoginHelper";
 
 /* Class = "NSMenuItem"; title = "Find Previous"; ObjectID = "OwM-mh-QMV"; */
 "OwM-mh-QMV.title" = "Find Previous";
@@ -353,8 +353,8 @@
 /* Class = "NSMenu"; title = "Kern"; ObjectID = "tlD-Oa-oAM"; */
 "tlD-Oa-oAM.title" = "Kern";
 
-/* Class = "NSMenu"; title = "DimQQLoginHelper"; ObjectID = "uQy-DD-JDr"; */
-"uQy-DD-JDr.title" = "DimQQLoginHelper";
+/* Class = "NSMenu"; title = "AppDimmerLoginHelper"; ObjectID = "uQy-DD-JDr"; */
+"uQy-DD-JDr.title" = "AppDimmerLoginHelper";
 
 /* Class = "NSMenuItem"; title = "Cut"; ObjectID = "uRl-iY-unG"; */
 "uRl-iY-unG.title" = "Cut";
