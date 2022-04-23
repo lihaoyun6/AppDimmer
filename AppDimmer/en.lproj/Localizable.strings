@@ -1,0 +1,19 @@
+/* 
+  Localizable.strings
+  AppDimmer
+
+  Created by apple on 2021/11/25.
+  
+*/
+"启用 AppDimmer" = "Enable AppDimmer";
+"登录时启动" = "Launch at Login";
+"跟随系统深色模式" = "Follow System Theme";
+"关于 AppDimmer" = "About AppDimmer";
+"退出" = "Quit";
+"出现错误" = "Unknown Error";
+"无法获取窗口列表!" = "Unable to get window list!";
+"添加App..." = "Add Application...";
+"从名单移除..." = "Remove from list...";
+"偏好设置..." = "Preferences...";
+"请选择要移出名单的程序:" = "Please select the app you want to remove from the list:";
+"请选择要添加到名单的程序:" = "Please select the app to be added to the list:";

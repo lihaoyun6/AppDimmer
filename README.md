@@ -1,32 +1,33 @@
 # 
 <p align="center">
-<img src="./img/DimQQ.png" width="200" height="200" />
-</p>
-<h1 align="center">DimQQ</h1>
-<h3 align="center">一款可自定义强度的QQ for Mac亮度降低工具</h3> 
-<p align="center">
-<img src="./img/donate.png" width="352"/>
+<img src="./img/AppDimmer.png" width="200" height="200" />
+<h1 align="center">AppDimmer</h1>
+<h3 align="center">一款用于 macOS 的软件窗口亮度控制工具</h3> 
 </p>
 
 ## 运行截图
 <p align="center">
-<img src="./img/Screenshot.png" width="920"/>  
+<img src="./img/Screenshot.png" width="1136"/>  
 </p>
 
 ## 使用
-DimQQ启动后会在菜单栏显示一个图标, 点击图标可对遮罩浓度强度调整.  
-使用QQ时, DimQQ会自动生成一个覆盖在QQ窗口上层的遮罩层, 以此来降低QQ窗口的亮度.  
+AppDimmer启动后会在菜单栏显示图标, 点击图标并拖动滑块可对遮罩强度进行调整.  
+您可以通过 <kbd>偏好设置...</kbd> > <kbd>添加App...</kbd> 来将您认为需要调节亮度的App添加到名单中.  
 
 ## 常见问题
-**1. 为什么DimQQ启动后没有任何窗口?**  
-> DimQQ除了菜单栏图标外, 仅会在QQ运行时生成遮罩. 除此之外没有其他额外的窗口.  
+**1. 为什么AppDimmer启动后没有任何窗口?**  
+> AppDimmer除了菜单栏图标外, 仅会在您指定的App运行时生成遮罩. 除此之外没有其他额外的窗口.  
 
-**2. 为什么打开DimQQ之后QQ没有变暗?**  
-> 可能因为启动DimQQ时, QQ处于非活动状态. 只需要点击一下QQ的窗体, DimQQ就会立即生成遮罩.  
+**2. 感觉默认的遮罩强度太黑或不够黑怎么办?**
+> 可以点击AppDimmer的菜单栏图标, 并拖动滑块以调节遮罩强度至您认为合适的比例.  
 
-**3. 使用的过程中可以移动QQ窗口吗, 打开多个QQ聊天窗口也可以吗?**  
-> 可以, 使用过程中DimQQ会动态检测QQ的窗口区域信息, 并实时调整遮罩尺寸和位置.  
-> 多窗口情况则会生成一个足以覆盖所有QQ窗口的遮罩.  
+**3. 使用的过程中可以移动App窗口吗, 支持多个App同时运行吗?**  
+> 可以. 使用过程中AppDimmer会动态检测所有指定App窗口位置和尺寸, 并为每个App的每个窗口实时生成遮罩.  
 
-**4. 支持多显示器使用场景吗?**  
-> 支持. 使用过程中可以任意移动QQ窗口到任何一台显示器上. 遮罩层都会自动跟踪. 
+**4. 支持在多台显示器间移动窗口吗?**  
+> 支持. 使用过程中可以任意移动程序窗口到任何一台显示器上. 遮罩会自动跟踪. 
+
+## 赞助
+<p align="center">
+<img src="./img/donate.png" width="352"/>
+</p>
