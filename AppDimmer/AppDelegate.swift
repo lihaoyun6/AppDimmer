@@ -41,7 +41,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var disable = UserDefaults.standard.bool(forKey: "disable")
     var darkOnly = UserDefaults.standard.bool(forKey: "darkOnly")
     var appList = [String]()
-    var MaskList = [NNSWindow]()
     var statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.variableLength)
     var foundHelper = false
     let menu = NSMenu()
@@ -59,10 +58,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             appList = listFromUserDefaults as! [String]
             if appList == [] {addToAppList(nil)}
         }
-        //如果亮度级别不存在, 则预设为50
+        
+        //初始化设定
         if level == 0{
             level = 50
             UserDefaults.standard.set(level, forKey: "level")
+            darkOnly = true
+            UserDefaults.standard.set(darkOnly, forKey: "darkOnly")
         }
         
         //生成主菜单
@@ -79,6 +81,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
         return true
+    }
+    
+    func windows() -> Array<NSWindow>{
+        return NSApplication.shared.windows.filter{$0.className == "AppDimmer.NNSWindow"}
     }
     
     //文件选择器
@@ -253,29 +259,32 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     //批量生成遮罩窗体
     func createMask(_ frontVisibleAppName: String, _ appWindows: [Dictionary<String, AnyObject>]){
-        let n = appWindows.count - MaskList.count
-        if n>0 {
-            for _ in 1...n { MaskList.append(NNSWindow(contentRect: .init(origin: .zero, size: .init(width: 0, height: 0)), styleMask: [.titled], backing: .buffered, defer: false)) }
-        } else if n<0 {
-            for i in 0..<max(abs(n), MaskList.count) { MaskList[i].orderOut(self) }
-        }
-        
+        let maskList = windows()
+        let mc = maskList.count
+        let n = appWindows.count - mc
+        if n<0 { for i in 1...abs(n) {maskList[mc-i].orderOut(self)} }
         for (i,Window) in appWindows.enumerated(){
             let bound = CGtoNS(CGRect(dictionaryRepresentation: Window[kCGWindowBounds as String] as! CFDictionary)!)
             let number = Window[kCGWindowNumber as String] as! Int
-            
-            MaskList[i].isOpaque = false
-            MaskList[i].ignoresMouseEvents = true
-            MaskList[i].titlebarAppearsTransparent = true
-            MaskList[i].hasShadow = false
-            MaskList[i].backgroundColor = NSColor(white: 0.0, alpha: CGFloat(level)/100)
-            MaskList[i].styleMask = .titled
-            MaskList[i].level = .normal
-            if i == 0 && appList.contains(frontVisibleAppName){MaskList[i].level = NSWindow.Level.floating}
-            for screen in NSScreen.screens { if NSEqualRects(screen.frame,bound) { MaskList[i].styleMask = .borderless } }
-            MaskList[i].setFrame(bound, display: true)
-            MaskList[i].order(.above, relativeTo: number)
-            //MaskList[i].makeKeyAndOrderFront(self)
+            var mask: NSWindow!
+            if i+1 > mc {
+                mask = NNSWindow(contentRect: .init(origin: .zero, size: .init(width: 0, height: 0)), styleMask: [.titled], backing: .buffered, defer: false)
+            }else{
+                mask = maskList[i]
+            }
+            mask.isOpaque = false
+            mask.hasShadow = false
+            mask.ignoresMouseEvents = true
+            mask.titlebarAppearsTransparent = true
+            mask.collectionBehavior = [.transient, .ignoresCycle]
+            mask.backgroundColor = NSColor(white: 0.0, alpha: CGFloat(level)/100)
+            mask.styleMask = .titled
+            mask.level = .normal
+            if i == 0 && appList.contains(frontVisibleAppName){mask.level = NSWindow.Level.floating}
+            for screen in NSScreen.screens { if NSEqualRects(screen.frame,bound) { mask.styleMask = .borderless } }
+            mask.setFrame(bound, display: true)
+            mask.order(.above, relativeTo: number)
+            //mask.makeKeyAndOrderFront(self)
         }
     }
     
@@ -293,9 +302,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     let owner = window[kCGWindowOwnerName as String] as! String
                     let bound = CGtoNS(CGRect(dictionaryRepresentation: window[kCGWindowBounds as String] as! CFDictionary)!)
                     //获取所需的窗口区域信息
+                    let w = bound.size.width
+                    let h = bound.size.height
+                    //获取所需的窗口区域信息
                     if appList.contains(owner) {
                         if owner == "QQ" {
-                            if bound.size.width > 160.0 && bound.size.height > 160.0 { if bound.size.width != 420.0 && bound.size.height != 277.0 { appWindows.append(window) } }
+                            if (w != 142.0 && h != 142.0) && (w != 420.0 && h != 277.0) && w != 260 && h != 35 { appWindows.append(window) }
                         }else{
                             appWindows.append(window)
                         }
@@ -310,13 +322,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         frontVisibleAppName = frontVisibleApp[kCGWindowOwnerName as String] as! String
                     }
                     createMask(frontVisibleAppName, appWindows)
+                }else{
+                    createMask("", appWindows)
                 }
             } else {
                 alert("出现错误".local(), "无法获取窗口列表!".local(), "退出".local())
                 NSApplication.shared.terminate(self)
             }
         }else{
-            for w in MaskList {w.orderOut(self)}
+            for w in windows() {w.orderOut(self)}
         }
     }
 }
