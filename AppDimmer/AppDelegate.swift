@@ -307,7 +307,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     //获取所需的窗口区域信息
                     if appList.contains(owner) {
                         if owner == "QQ" {
-                            if (w != 142.0 && h != 142.0) && (w != 420.0 && h != 277.0) && w != 260 && h != 35 { appWindows.append(window) }
+                            if (w != 112.0 && h != 112.0) && (w != 142.0 && h != 142.0) && (w != 420.0 && h != 277.0) && w != 260 && h != 35 { appWindows.append(window) }
                         }else{
                             appWindows.append(window)
                         }
