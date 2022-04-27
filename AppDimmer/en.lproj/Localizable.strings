@@ -15,5 +15,7 @@
 "添加App..." = "Add Application...";
 "从名单移除..." = "Remove from list...";
 "偏好设置..." = "Preferences...";
+"减少窗口匹配" = "Match less windows";
+"透明度" = "Transparency";
 "请选择要移出名单的程序:" = "Please select the app you want to remove from the list:";
 "请选择要添加到名单的程序:" = "Please select the app to be added to the list:";

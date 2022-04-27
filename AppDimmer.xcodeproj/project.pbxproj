@@ -13,6 +13,7 @@
 		187FC81B274E4D5D00939612 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 187FC81A274E4D5D00939612 /* Assets.xcassets */; };
 		187FC81E274E4D5D00939612 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 187FC81C274E4D5D00939612 /* Main.storyboard */; };
 		187FC827274E505900939612 /* AppDimmerLoginHelper.app in CopyFiles */ = {isa = PBXBuildFile; fileRef = 187FC814274E4D5B00939612 /* AppDimmerLoginHelper.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		188A0E2E281984FE00ED08BF /* AXSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 188A0E2D281984FE00ED08BF /* AXSwift */; };
 		18FCCF36274B9317005FF1AD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18FCCF35274B9317005FF1AD /* AppDelegate.swift */; };
 		18FCCF3A274B9318005FF1AD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18FCCF39274B9318005FF1AD /* Assets.xcassets */; };
 		18FCCF3D274B9318005FF1AD /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 18FCCF3B274B9318005FF1AD /* Main.storyboard */; };
@@ -67,6 +68,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				188A0E2E281984FE00ED08BF /* AXSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -151,6 +153,9 @@
 			dependencies = (
 			);
 			name = AppDimmer;
+			packageProductDependencies = (
+				188A0E2D281984FE00ED08BF /* AXSwift */,
+			);
 			productName = DimQQ;
 			productReference = 18FCCF32274B9317005FF1AD /* AppDimmer.app */;
 			productType = "com.apple.product-type.application";
@@ -185,6 +190,9 @@
 				"zh-HK",
 			);
 			mainGroup = 18FCCF29274B9317005FF1AD;
+			packageReferences = (
+				188A0E2C281984FE00ED08BF /* XCRemoteSwiftPackageReference "AXSwift" */,
+			);
 			productRefGroup = 18FCCF33274B9317005FF1AD /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -466,7 +474,7 @@
 				CODE_SIGN_ENTITLEMENTS = AppDimmer/AppDimmer.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = L4T783637F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -480,7 +488,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.2.8;
+				MARKETING_VERSION = 0.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.AppDimmer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -497,7 +505,7 @@
 				CODE_SIGN_ENTITLEMENTS = AppDimmer/AppDimmer.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = L4T783637F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -511,7 +519,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.2.8;
+				MARKETING_VERSION = 0.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.AppDimmer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -550,6 +558,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		188A0E2C281984FE00ED08BF /* XCRemoteSwiftPackageReference "AXSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tmandry/AXSwift";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		188A0E2D281984FE00ED08BF /* AXSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 188A0E2C281984FE00ED08BF /* XCRemoteSwiftPackageReference "AXSwift" */;
+			productName = AXSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 18FCCF2A274B9317005FF1AD /* Project object */;
 }

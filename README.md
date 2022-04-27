@@ -27,6 +27,9 @@ AppDimmer启动后会在菜单栏显示图标, 点击图标并拖动滑块可对
 **4. 支持在多台显示器间移动窗口吗?**  
 > 支持. 使用过程中可以任意移动程序窗口到任何一台显示器上. 遮罩会自动跟踪. 
 
+## 致谢
+[AXSwift](https://github.com/tmandry/AXSwift) @tmandry  
+
 ## 赞助
 <p align="center">
 <img src="./img/donate.png" width="352"/>

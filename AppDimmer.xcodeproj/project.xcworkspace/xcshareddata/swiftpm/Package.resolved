@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "axswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tmandry/AXSwift",
+      "state" : {
+        "branch" : "main",
+        "revision" : "e18a18453d135ad45809a384ee5139e05ea52def"
+      }
+    }
+  ],
+  "version" : 2
+}
