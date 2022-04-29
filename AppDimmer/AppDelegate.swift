@@ -16,9 +16,13 @@ extension String {
     }
 }
 
+//扩展Bundle类
 extension Bundle {
     var displayName: String? {
-        return object(forInfoDictionaryKey: "CFBundleDisplayName") as? String
+        if let name = object(forInfoDictionaryKey: "CFBundleDisplayName") as? String {
+            return name
+        }
+        return object(forInfoDictionaryKey: "CFBundleName") as? String
     }
     var name: String? {
         return object(forInfoDictionaryKey: "CFBundleName") as? String
@@ -34,52 +38,50 @@ class NNSWindow : NSWindow {
 }
 
 @main
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     var timer: Timer?
-    var menuSlider = NSSlider()
+    //var menuSlider = NSSlider()
     var level = UserDefaults.standard.integer(forKey: "level")
     var disable = UserDefaults.standard.bool(forKey: "disable")
     var darkOnly = UserDefaults.standard.bool(forKey: "darkOnly")
     var cleanMode = UserDefaults.standard.bool(forKey: "cleanMode")
-    var appList = [String]()
-    var unStandardWindows = [CGSize]()
+    var appList = (UserDefaults.standard.array(forKey: "appList") ?? []) as! [String]
+    var windowsCount = [String]()
+    var unStandardWindows = [Array<Any>]()
+    var fullScreenWindows = [NSRect]()
     var statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.variableLength)
+    var fApp = NSWorkspace.shared.frontmostApplication?.localizedName ?? ""
     var foundHelper = false
-    var count = 0
     let menu = NSMenu()
     let options = NSMenu()
     let helperBundleName = "com.lihaoyun6.AppDimmerLoginHelper"
     let levelWhiteList = [kCGNormalWindowLevel,kCGFloatingWindowLevel,kCGTornOffMenuWindowLevel,kCGTornOffMenuWindowLevel,kCGModalPanelWindowLevel,kCGScreenSaverWindowLevel,kCGDockWindowLevel,1]
     let levelBlackList = [kCGMainMenuWindowLevel,kCGStatusWindowLevel]
+    let subRoleBlackList = ["AXSystemDialog"]
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        //初始化设定
+        if level == 0{
+            level = 30
+            darkOnly = true
+            cleanMode = true
+            UserDefaults.standard.set(level, forKey: "level")
+            UserDefaults.standard.set(darkOnly, forKey: "darkOnly")
+            UserDefaults.standard.set(cleanMode, forKey: "cleanMode")
+        }
         //检查辅助功能权限
         if cleanMode {_ = UIElement.isProcessTrusted(withPrompt: true)}
         //获取自启代理状态
         foundHelper = NSWorkspace.shared.runningApplications.contains { $0.bundleIdentifier == helperBundleName }
-        let listFromUserDefaults = UserDefaults.standard.array(forKey: "appList")
-        if listFromUserDefaults == nil{
-            addToAppList(nil)
-        }else{
-            appList = listFromUserDefaults as! [String]
-            if appList == [] {addToAppList(nil)}
-        }
-        
-        //初始化设定
-        if level == 0{
-            level = 70
-            UserDefaults.standard.set(level, forKey: "level")
-            darkOnly = true
-            UserDefaults.standard.set(darkOnly, forKey: "darkOnly")
-        }
-        
-        //生成主菜单
-        mainMenu()
         
         //初始化定时器
         timer = Timer(timeInterval: 0.06, repeats: true, block: {timer in self.loopFireHandler(timer)})
         RunLoop.main.add(timer!, forMode: .common)
+        
+        //生成主菜单
+        menuIcon()
+        menuWillOpen(menu)
     }
     
     func applicationWillTerminate(_ aNotification: Notification) {
@@ -92,30 +94,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func windows() -> Array<NSWindow>{
         return NSApplication.shared.windows.filter{$0.className == "AppDimmer.NNSWindow"}
-    }
-    
-    //文件选择器
-    func selectFile() -> URL {
-        let dialog = NSOpenPanel()
-        dialog.message = "请选择要添加到名单的程序:".local()
-        dialog.canChooseDirectories = false
-        dialog.allowsMultipleSelection = false
-        dialog.allowedFileTypes = ["app"]
-        
-        let launcherLogPathWithTilde = "/Applications" as NSString
-        let expandedLauncherLogPath = launcherLogPathWithTilde.expandingTildeInPath
-        dialog.directoryURL = NSURL.fileURL(withPath: expandedLauncherLogPath, isDirectory: true)
-      
-        var fileChoice: URL?
-        if dialog.runModal() == NSApplication.ModalResponse.OK {fileChoice = dialog.url}
-        return fileChoice ?? URL(fileURLWithPath: "/Applications")
-    }
-    
-    //列表操作窗口
-    func dialogWithList(_ list: Array<String>, _ prompt: String) -> String{
-        let arr = "{\"\(list.joined(separator: "\",\""))\"}"
-        let ret = NSAppleScript(source: "choose from list \(arr) with prompt \"\(prompt)\"")!.executeAndReturnError(nil).stringValue!
-        return ret
     }
     
     //显示关于窗口
@@ -131,14 +109,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         switch event.type {
         case .leftMouseDown, .rightMouseDown:
             level = Int(100-slider.intValue)
-            menu.items[2].title = "\("透明度".local()): \(slider.intValue)%"
+            menu.items[1].title = "\("亮度: ".local())\(slider.intValue)%"
         case .leftMouseUp, .rightMouseUp:
-            menu.items[2].title = "启用 AppDimmer".local()
-            menuIcon()
+            menu.items[1].title = "\(fApp): \(getEnableText(fApp))"
             UserDefaults.standard.set(level, forKey: "level")
         case .leftMouseDragged, .rightMouseDragged:
             level = Int(100-slider.intValue)
-            menu.items[2].title = "\("透明度".local()): \(slider.intValue)%"
+            menu.items[1].title = "\("亮度: ".local())\(slider.intValue)%"
         default:
             break
         }
@@ -155,15 +132,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return myPopup.runModal() == NSApplication.ModalResponse.alertFirstButtonReturn
     }
     
-    //设置"启用 AppDimmer"
-    @objc func setDisable(_ sender: NSMenuItem) {
-        disable.toggle()
-        menuSlider.isEnabled = !disable
-        menuIcon()
-        menu.item(withTitle: sender.title)?.state = state(!disable)
-        UserDefaults.standard.set(disable, forKey: "disable")
-    }
-    
     //设置"仅在深色模式生效"
     @objc func setDarkOnly(_ sender: NSMenuItem) {
         darkOnly.toggle()
@@ -172,22 +140,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     //添加到匹配名单
-    @objc func addToAppList(_ sender: Any?) {
-        let bundle = Bundle.init(url: selectFile())
-        var appName = ""
-        if let name = bundle?.name {appName = name}
-        if let displayName = bundle?.displayName {appName = displayName}
-        if appName != "" && appName != "AppDimmer" && !appList.contains(appName){
-            appList.append(appName)
+    @objc func editAppList(_ sender: NSMenuItem) {
+        if fApp != "" && fApp != "AppDimmer"{
+            if !appList.contains(fApp){
+                sender.state = state(true)
+                appList.append(fApp)
+            } else {
+                sender.state = state(false)
+                appList = appList.filter{$0 != fApp}
+            }
             UserDefaults.standard.set(appList, forKey: "appList")
         }
-    }
-    
-    //从名单中移除
-    @objc func editAppList(_ sender: Any?) {
-        let appName = dialogWithList(appList, "请选择要移出名单的程序:".local())
-        appList = appList.filter{$0 != appName}
-        UserDefaults.standard.set(appList, forKey: "appList")
     }
     
     //设置"登录时启动"
@@ -205,40 +168,52 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         UserDefaults.standard.set(cleanMode, forKey: "cleanMode")
     }
     
+    //菜单栏按钮左右键响应
+    @objc func statusBarButtonClicked(_ sender: NSStatusBarButton) {
+        let event = NSApp.currentEvent!
+        if event.type == NSEvent.EventType.rightMouseUp {
+            setDisable()
+        } else {
+            statusItem.menu = menu
+            statusItem.button?.performClick(nil)
+        }
+    }
+    
+    //总开关
+    func setDisable() {
+        disable.toggle()
+        statusItem.button?.image = NSImage(named:NSImage.Name("MenuBarIcon\(NSNumber(value: !disable).intValue)"))
+        UserDefaults.standard.set(disable, forKey: "disable")
+    }
+    
     //初始化菜单栏按钮
     func menuIcon(){
-        //初始化菜单栏按钮
         if let button = statusItem.button {
-            if !disable{
-                button.image = NSImage(named:NSImage.Name("MenuBarIcon"))
-            }else{
-                button.image = NSImage(named:NSImage.Name("MenuBarIcon_Disable"))
-            }
+            button.action = #selector(statusBarButtonClicked(_:))
+            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+            button.image = NSImage(named:NSImage.Name("MenuBarIcon\(NSNumber(value: !disable).intValue)"))
         }
     }
     
     //主菜单生成函数
-    func mainMenu(){
-        menuIcon()
-        
+    func menuWillOpen(_ menu: NSMenu) {
+        menu.removeAllItems()
+        options.removeAllItems()
+        menu.delegate = self
+        menu.autoenablesItems = false
+        //menu.addItem(NSMenuItem.separator())
+        let Switch = menu.addItem(withTitle: "\(fApp): \(getEnableText(fApp))", action: #selector(editAppList(_:)), keyEquivalent: "")
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(withTitle: "启用 AppDimmer".local(), action: #selector(setDisable(_:)), keyEquivalent: "").state = state(!disable)
         menu.setSubmenu(options, for: menu.addItem(withTitle: "偏好设置...".local(), action: nil, keyEquivalent: ""))
         options.addItem(withTitle: "登录时启动".local(), action: #selector(setRunAtLogin(_:)), keyEquivalent: "").state = state(foundHelper)
-        options.addItem(withTitle: "跟随系统深色模式".local(), action: #selector(setDarkOnly(_:)), keyEquivalent: "").state = state(darkOnly)
-        options.addItem(withTitle: "减少窗口匹配".local(), action: #selector(setCleanMode(_:)), keyEquivalent: "").state = state(cleanMode)
         options.addItem(NSMenuItem.separator())
-        options.addItem(withTitle: "添加App...".local(), action: #selector(addToAppList(_:)), keyEquivalent: "")
-        options.addItem(withTitle: "从名单移除...".local(), action: #selector(editAppList(_:)), keyEquivalent: "")
-        
-        menu.addItem(NSMenuItem.separator())
-        //menu.addItem(withTitle: "赞助一瓶快乐水".local(), action: #selector(aboutDialog(_:)), keyEquivalent: "")
+        options.addItem(withTitle: "跟随系统主题".local(), action: #selector(setDarkOnly(_:)), keyEquivalent: "").state = state(darkOnly)
+        options.addItem(withTitle: "减少鬼影".local(), action: #selector(setCleanMode(_:)), keyEquivalent: "").state = state(cleanMode)
         menu.addItem(withTitle: "关于 AppDimmer".local(), action: #selector(aboutDialog(_:)), keyEquivalent: "")
-        menu.addItem(withTitle: "退出".local(), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "")
-        statusItem.menu = menu
-        
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(withTitle: "退出".local(), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         let menuSliderItem = NSMenuItem()
-        menuSlider = NSSlider.init(frame: NSRect(x: 10, y: 0, width: menu.size.width-20, height: 32))
+        let menuSlider = NSSlider.init(frame: NSRect(x: 10, y: 0, width: menu.size.width-20, height: 32))
         let view = NSView.init(frame: NSRect(x: 0, y: 0, width: menu.size.width, height: 32))
         view.addSubview(menuSlider)
         menuSlider.sliderType = NSSlider.SliderType.linear
@@ -250,6 +225,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menuSlider.intValue = Int32(100-level)
         menuSliderItem.view = view
         menu.insertItem(menuSliderItem, at: 0)
+        menuSlider.isEnabled = !disable
+        Switch.isEnabled = !disable && fApp != "AppDimmer"
+        Switch.state = state(appList.contains(fApp))
+    }
+    
+    //关闭菜单时清除
+    func menuDidClose(_ menu: NSMenu) {
+        statusItem.menu = nil
     }
     
     //将Bool值转换为NSControl.StateValue
@@ -266,11 +249,67 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return false
     }
     
+    //获取提示字符串
+    func getEnableText(_ name: String) -> String {
+        if appList.contains(name) { return "已启用".local() }
+        return "未启用".local()
+    }
+    
     //CGRect坐标系转为NSRect
-    func CGtoNS(_ bound: CGRect) ->NSRect{
+    func CGtoNS(_ bound: CGRect) -> NSRect{
         let newY = NSScreen.screens[0].frame.height - bound.size.height - bound.origin.y
         let frame = NSRect(x: bound.origin.x, y: newY, width: bound.size.width, height: bound.size.height)
         return frame
+    }
+    
+    //通过辅助功能权限获取窗口属性
+    func getWindowAttribs() {
+        if cleanMode && UIElement.isProcessTrusted() {
+            unStandardWindows.removeAll()
+            let apps = NSWorkspace.shared.runningApplications.filter{appList.contains($0.localizedName ?? "")}
+            for app in apps {
+                let uiApp = Application(app)!
+                guard let windows = try? uiApp.windows() ?? [] else {return}
+                for window in windows {
+                    guard let attribs = try? window.getMultipleAttributes(.subrole, .children, .position, .size) else {return}
+                    let children = (attribs[AXSwift.Attribute.children] ?? ()) as AnyObject
+                    let subrole = (attribs[AXSwift.Attribute.subrole] ?? "") as AnyObject
+                    let size = (attribs[AXSwift.Attribute.size] ?? (0.0, 0.0)) as! CGSize
+                    unStandardWindows.append([app.localizedName ?? "", children.count ?? 0, subrole as! String, size])
+                }
+            }
+        }
+    }
+    
+    //通过辅助功能权限获取全屏窗口
+    func getFullScreen() {
+        Thread.detachNewThread {
+            usleep(700000)
+            self.fullScreenWindows.removeAll()
+            let apps = NSWorkspace.shared.runningApplications.filter{self.appList.contains($0.localizedName ?? "")}
+            for app in apps {
+                let uiApp = Application(app)!
+                guard let windows = try? uiApp.windows() ?? [] else {return}
+                for window in windows {
+                    guard let attribs = try? window.getMultipleAttributes(.position, .size, .fullScreen) else {return}
+                    let fScreen = (attribs[AXSwift.Attribute.fullScreen] ?? 0) as! Int
+                    if fScreen == 1 {
+                        let posi = (attribs[AXSwift.Attribute.position] ?? (0.0, 0.0)) as! CGPoint
+                        let size = (attribs[AXSwift.Attribute.size] ?? (0.0, 0.0)) as! CGSize
+                        let rect = self.CGtoNS(CGRect(origin: posi, size: size))
+                        self.fullScreenWindows.append(rect)
+                    }
+                }
+            }
+        }
+    }
+    
+    //判断窗口是否处于全屏模式
+    func isFullScreen(_ window: Dictionary<String, AnyObject>) -> Bool {
+        let bound = CGtoNS(CGRect(dictionaryRepresentation: window[kCGWindowBounds as String] as! CFDictionary)!)
+        let fullscreen = NSScreen.screens.filter{ NSEqualRects($0.frame,bound) }
+        if fullscreen.count > 0 || fullScreenWindows.contains(bound) { return true }
+        return false
     }
     
     //批量生成遮罩窗体
@@ -284,7 +323,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let owner = Window[kCGWindowOwnerName as String] as! String
             let number = Window[kCGWindowNumber as String] as! Int
             var layer = Window[kCGWindowLayer as String] as! Int
-            if (i == 0 && frontVisibleAppName == owner) { layer += 1 }
+            if i == 0 && frontVisibleAppName == owner { layer += 1 }
             var mask: NSWindow!
             if i+1 > mc {
                 mask = NNSWindow(contentRect: .init(origin: .zero, size: .init(width: 0, height: 0)), styleMask: [.titled], backing: .buffered, defer: false)
@@ -299,60 +338,44 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             mask.hasShadow = false
             mask.ignoresMouseEvents = true
             mask.titlebarAppearsTransparent = true
-            for screen in NSScreen.screens { if NSEqualRects(screen.frame,bound) { mask.styleMask = .borderless } }
+            if isFullScreen(Window) { mask.styleMask = .borderless } else { mask.styleMask = .titled }
             mask.setFrame(bound, display: true)
             mask.order(.above, relativeTo: number)
             //mask.makeKeyAndOrderFront(self)
         }
-        //辅助功能检测延时, 防止CPU占用过高
-        if count == 10 { count = 0 } else { count += 1 }
     }
     
     //循环体
     @objc func loopFireHandler(_ timer: Timer?) -> Void {
-        let fApp = NSWorkspace.shared.frontmostApplication?.localizedName ?? ""
+        fApp = NSWorkspace.shared.frontmostApplication?.localizedName ?? ""
         //检测启动条件
         if isDarkMode() && !disable && level != 1 {
-            //通过辅助功能权限排除特定属性的窗口
-            if cleanMode && UIElement.isProcessTrusted() && count == 0 && appList.contains(fApp){
-                var unStandardWindowsT = [CGSize]()
-                let applications = NSWorkspace.shared.runningApplications.filter{appList.contains($0.localizedName ?? "")}
-                for application in applications {
-                    let uiApp = Application(application)!
-                    guard let t = try? uiApp.windows() ?? [] else {return}
-                    let dialogs = t.filter{guard let a = try? $0.attribute(.subrole) == "AXSystemDialog" else {return false};return a}
-                    for dialog in dialogs {
-                        let attribs = try! dialog.getMultipleAttributes(.position, .size)
-                        let size = (attribs[AXSwift.Attribute.size] ?? (0.0, 0.0)) as! CGSize
-                        unStandardWindowsT.append(size)
-                    }
-                }
-                unStandardWindows = unStandardWindowsT
-            }
             //声明窗口区域列表
             var appWindows = [Dictionary<String, AnyObject>]()
             //检测当前屏幕上所有的可见窗口
             if let windowList = CGWindowListCopyWindowInfo([.excludeDesktopElements,.optionOnScreenOnly], kCGNullWindowID) as? [[String: AnyObject]] {
-                var visibleWindows = windowList.filter{$0["kCGWindowAlpha"] as! Float != 0.0}
-                if cleanMode {
-                    visibleWindows = visibleWindows.filter{levelWhiteList.contains(CGWindowLevel($0["kCGWindowLayer"] as! Int))}
-                }else{
-                    visibleWindows = visibleWindows.filter{!levelBlackList.contains(CGWindowLevel($0["kCGWindowLayer"] as! Int))}
+                var visibleWindows = windowList.filter{ levelWhiteList.contains(CGWindowLevel($0["kCGWindowLayer"] as! Int))}
+                if !cleanMode { visibleWindows = windowList.filter{ !levelBlackList.contains(CGWindowLevel($0["kCGWindowLayer"] as! Int))} }
+                let windowInAppList = visibleWindows.filter{ appList.contains($0["kCGWindowOwnerName"] as! String) && $0["kCGWindowAlpha"] as! Float != 0.0 }
+                let wc: [String] = windowInAppList.map{
+                    let size = NSStringFromSize((CGRect(dictionaryRepresentation: $0[kCGWindowBounds as String] as! CFDictionary)!).size)
+                    let layer = $0[kCGWindowLayer as String] as! Int
+                    return "\(size) \(layer)"
                 }
-                for window in visibleWindows {
-                    //获取窗口所属App名称
+                if (wc.count != windowsCount.count) || (Set(wc) != Set(windowsCount)) { getWindowAttribs(); getFullScreen() }
+                windowsCount = wc
+                for window in windowInAppList {
+                    if !cleanMode { appWindows.append(window); continue }
+                    //获取窗口基本信息
                     let owner = window[kCGWindowOwnerName as String] as! String
-                    let bound = CGtoNS(CGRect(dictionaryRepresentation: window[kCGWindowBounds as String] as! CFDictionary)!)
-                    //获取所需的窗口区域信息
-                    let w = bound.size.width
-                    let h = bound.size.height
-                    //获取所需的窗口区域信息
-                    if appList.contains(owner) && (!unStandardWindows.contains(CGSize(width: w, height: h)) || !cleanMode){
-                        if owner == "QQ" {
-                            if (w != 112.0 && h != 112.0) && (w != 142.0 && h != 142.0) && (w != 420.0 && h != 277.0) && w != 260 && h != 35 && window[kCGWindowLayer as String] as! Int != 500 { appWindows.append(window) }
-                        }else{
-                            appWindows.append(window)
-                        }
+                    let size = CGRect(dictionaryRepresentation: window[kCGWindowBounds as String] as! CFDictionary)!.size
+                    let attribs = unStandardWindows.filter{ $0.first as! String == owner && $0.last as! CGSize == size }
+                    if attribs.count != 0 {
+                        if isFullScreen(window) { appWindows.append(window); continue }
+                        let layer = window[kCGWindowLayer as String] as! Int
+                        let childen = attribs.first?[1] as! Int
+                        let subrole = attribs.first?[2] as! String
+                        if (layer == 0 && subrole == "AXUnknown") || subRoleBlackList.contains(subrole) || childen < 1 { continue } else { appWindows.append(window) }
                     }
                 }
                 createMask(fApp, appWindows)
