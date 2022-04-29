@@ -135,7 +135,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     //设置"仅在深色模式生效"
     @objc func setDarkOnly(_ sender: NSMenuItem) {
         darkOnly.toggle()
-        options.item(withTitle: sender.title)?.state = state(darkOnly)
+        sender.state = state(darkOnly)
         UserDefaults.standard.set(darkOnly, forKey: "darkOnly")
     }
     
@@ -157,14 +157,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc func setRunAtLogin(_ sender: NSMenuItem) {
         foundHelper.toggle()
         SMLoginItemSetEnabled(helperBundleName as CFString, foundHelper)
-        options.item(withTitle: sender.title)?.state = state(foundHelper)
+        sender.state = state(foundHelper)
     }
     
     //设置窗口匹配模式
     @objc func setCleanMode(_ sender: NSMenuItem) {
         cleanMode.toggle()
+        windowsCount.removeAll()
         if cleanMode {_ = UIElement.isProcessTrusted(withPrompt: true)}
-        options.item(withTitle: sender.title)?.state = state(cleanMode)
+        sender.state = state(cleanMode)
         UserDefaults.standard.set(cleanMode, forKey: "cleanMode")
     }
     
