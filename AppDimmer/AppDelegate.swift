@@ -383,7 +383,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                             appWindows.append(w)
                         }
                     }else{
-                        appWindows.append(w)
+                        //appWindows.append(w)
                     }
                 }
                 createMask(fApp, appWindows)
