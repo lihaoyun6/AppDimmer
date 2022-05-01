@@ -9,39 +9,20 @@ import Cocoa
 import AXSwift
 import ServiceManagement
 
+//扩展本地化字符串功能
 extension String {
-    //本地化字符串功能
-    func local() -> String {
-        return NSLocalizedString(self, comment: "")
-    }
+    var local: String { return NSLocalizedString(self, comment: "") }
 }
 
-//扩展Bundle类
-extension Bundle {
-    var displayName: String? {
-        if let name = object(forInfoDictionaryKey: "CFBundleDisplayName") as? String {
-            return name
-        }
-        return object(forInfoDictionaryKey: "CFBundleName") as? String
-    }
-    var name: String? {
-        return object(forInfoDictionaryKey: "CFBundleName") as? String
-    }
-}
-
-//为NSWindow新建子类
+//重写constrainFrameRect以支持从可见区域外绘制窗口
 class NNSWindow : NSWindow {
-    //重写constrainFrameRect以支持从可见区域外绘制窗口
-    override func constrainFrameRect(_ frameRect: NSRect, to screen: NSScreen?) -> NSRect {
-        return frameRect
-    }
+    override func constrainFrameRect(_ frameRect: NSRect, to screen: NSScreen?) -> NSRect { return frameRect }
 }
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     var timer: Timer?
-    //var menuSlider = NSSlider()
     var level = UserDefaults.standard.integer(forKey: "level")
     var disable = UserDefaults.standard.bool(forKey: "disable")
     var darkOnly = UserDefaults.standard.bool(forKey: "darkOnly")
@@ -56,9 +37,26 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     let menu = NSMenu()
     let options = NSMenu()
     let helperBundleName = "com.lihaoyun6.AppDimmerLoginHelper"
-    let levelWhiteList = [kCGNormalWindowLevel,kCGFloatingWindowLevel,kCGTornOffMenuWindowLevel,kCGTornOffMenuWindowLevel,kCGModalPanelWindowLevel,kCGScreenSaverWindowLevel,kCGDockWindowLevel,1]
-    let levelBlackList = [kCGMainMenuWindowLevel,kCGStatusWindowLevel]
     let subRoleBlackList = ["AXSystemDialog"]
+    let levelWhiteList = [0,1,3,8,20,1000]
+    let levelBlackList = [24,25,500]
+    /*
+     kCGBackstopMenuLevel = -20
+     kCGNormalWindowLevel = 0
+     kCGFloatingWindowLevel = 3
+     kCGTornOffMenuWindowLevel = 3
+     kCGModalPanelWindowLevel = 8
+     kCGUtilityWindowLevel = 19
+     kCGDockWindowLevel = 20
+     kCGMainMenuWindowLevel = 24
+     kCGStatusWindowLevel = 25
+     kCGPopUpMenuWindowLevel = 101
+     kCGOverlayWindowLevel = 102
+     kCGHelpWindowLevel = 200
+     kCGDraggingWindowLevel = 500
+     kCGScreenSaverWindowLevel = 1000
+     kCGAssistiveTechHighWindowLevel = 1500
+     */
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         //初始化设定
@@ -109,13 +107,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         switch event.type {
         case .leftMouseDown, .rightMouseDown:
             level = Int(100-slider.intValue)
-            menu.items[1].title = "\("亮度: ".local())\(slider.intValue)%"
+            menu.items[1].title = "\("亮度: ".local)\(slider.intValue)%"
         case .leftMouseUp, .rightMouseUp:
             menu.items[1].title = "\(fApp): \(getEnableText(fApp))"
             UserDefaults.standard.set(level, forKey: "level")
         case .leftMouseDragged, .rightMouseDragged:
             level = Int(100-slider.intValue)
-            menu.items[1].title = "\("亮度: ".local())\(slider.intValue)%"
+            menu.items[1].title = "\("亮度: ".local)\(slider.intValue)%"
         default:
             break
         }
@@ -205,14 +203,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         //menu.addItem(NSMenuItem.separator())
         let Switch = menu.addItem(withTitle: "\(fApp): \(getEnableText(fApp))", action: #selector(editAppList(_:)), keyEquivalent: "")
         menu.addItem(NSMenuItem.separator())
-        menu.setSubmenu(options, for: menu.addItem(withTitle: "偏好设置...".local(), action: nil, keyEquivalent: ""))
-        options.addItem(withTitle: "登录时启动".local(), action: #selector(setRunAtLogin(_:)), keyEquivalent: "").state = state(foundHelper)
+        menu.setSubmenu(options, for: menu.addItem(withTitle: "偏好设置...".local, action: nil, keyEquivalent: ""))
+        options.addItem(withTitle: "登录时启动".local, action: #selector(setRunAtLogin(_:)), keyEquivalent: "").state = state(foundHelper)
         options.addItem(NSMenuItem.separator())
-        options.addItem(withTitle: "跟随系统主题".local(), action: #selector(setDarkOnly(_:)), keyEquivalent: "").state = state(darkOnly)
-        options.addItem(withTitle: "减少鬼影".local(), action: #selector(setCleanMode(_:)), keyEquivalent: "").state = state(cleanMode)
-        menu.addItem(withTitle: "关于 AppDimmer".local(), action: #selector(aboutDialog(_:)), keyEquivalent: "")
+        options.addItem(withTitle: "跟随系统主题".local, action: #selector(setDarkOnly(_:)), keyEquivalent: "").state = state(darkOnly)
+        options.addItem(withTitle: "减少鬼影".local, action: #selector(setCleanMode(_:)), keyEquivalent: "").state = state(cleanMode)
+        menu.addItem(withTitle: "关于 AppDimmer".local, action: #selector(aboutDialog(_:)), keyEquivalent: "")
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(withTitle: "退出".local(), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        menu.addItem(withTitle: "退出".local, action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         let menuSliderItem = NSMenuItem()
         let menuSlider = NSSlider.init(frame: NSRect(x: 10, y: 0, width: menu.size.width-20, height: 32))
         let view = NSView.init(frame: NSRect(x: 0, y: 0, width: menu.size.width, height: 32))
@@ -252,8 +250,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     //获取提示字符串
     func getEnableText(_ name: String) -> String {
-        if appList.contains(name) { return "已启用".local() }
-        return "未启用".local()
+        if appList.contains(name) { return "已启用".local }
+        return "未启用".local
     }
     
     //CGRect坐标系转为NSRect
@@ -273,9 +271,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 guard let windows = try? uiApp.windows() ?? [] else {return}
                 for window in windows {
                     guard let attribs = try? window.getMultipleAttributes(.subrole, .children, .position, .size) else {return}
-                    let children = (attribs[AXSwift.Attribute.children] ?? ()) as AnyObject
-                    let subrole = (attribs[AXSwift.Attribute.subrole] ?? "") as AnyObject
-                    let size = (attribs[AXSwift.Attribute.size] ?? (0.0, 0.0)) as! CGSize
+                    let children = (attribs[.children] ?? ()) as AnyObject
+                    let subrole = (attribs[.subrole] ?? "") as AnyObject
+                    let size = (attribs[.size] ?? (0.0, 0.0)) as! CGSize
                     unStandardWindows.append([app.localizedName ?? "", children.count ?? 0, subrole as! String, size])
                 }
             }
@@ -306,12 +304,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     //判断窗口是否处于全屏模式
-    func isFullScreen(_ window: Dictionary<String, AnyObject>) -> Bool {
-        let bound = CGtoNS(CGRect(dictionaryRepresentation: window[kCGWindowBounds as String] as! CFDictionary)!)
+    func isFullScreen(_ bound: NSRect) -> Bool {
         let fullscreen = NSScreen.screens.filter{ NSEqualRects($0.frame,bound) }
         if fullscreen.count > 0 || fullScreenWindows.contains(bound) { return true }
         return false
     }
+    
+    func getLayer(_ w: [String: AnyObject]) -> Int { return (w["kCGWindowLayer"] as! NSNumber).intValue }
+    func getAlpha(_ w: [String: AnyObject]) -> Int { return (w["kCGWindowAlpha"] as! NSNumber).intValue }
+    func getNumber(_ w: [String: AnyObject]) -> Int { return (w["kCGWindowNumber"] as! NSNumber).intValue }
+    func getOwner(_ w: [String: AnyObject]) -> String { return w["kCGWindowOwnerName"] as! String }
+    func getBound(_ w: [String: AnyObject]) -> CGRect { return CGtoNS(CGRect(dictionaryRepresentation: w["kCGWindowBounds"] as! CFDictionary)!) }
     
     //批量生成遮罩窗体
     func createMask(_ frontVisibleAppName: String, _ appWindows: [Dictionary<String, AnyObject>]){
@@ -319,11 +322,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let mc = maskList.count
         let n = appWindows.count - mc
         if n<0 { for i in 1...abs(n) {maskList[mc-i].orderOut(self)} }
-        for (i,Window) in appWindows.enumerated(){
-            let bound = CGtoNS(CGRect(dictionaryRepresentation: Window[kCGWindowBounds as String] as! CFDictionary)!)
-            let owner = Window[kCGWindowOwnerName as String] as! String
-            let number = Window[kCGWindowNumber as String] as! Int
-            var layer = Window[kCGWindowLayer as String] as! Int
+        for (i,w) in appWindows.enumerated(){
+            let bound = getBound(w)
+            let owner = getOwner(w)
+            let number = getNumber(w)
+            var layer = getLayer(w)
             if i == 0 && frontVisibleAppName == owner { layer += 1 }
             var mask: NSWindow!
             if i+1 > mc {
@@ -339,7 +342,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             mask.hasShadow = false
             mask.ignoresMouseEvents = true
             mask.titlebarAppearsTransparent = true
-            if isFullScreen(Window) { mask.styleMask = .borderless } else { mask.styleMask = .titled }
+            if isFullScreen(bound) { mask.styleMask = .borderless } else { mask.styleMask = .titled }
             mask.setFrame(bound, display: true)
             mask.order(.above, relativeTo: number)
             //mask.makeKeyAndOrderFront(self)
@@ -352,36 +355,40 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         //检测启动条件
         if isDarkMode() && !disable && level != 1 {
             //声明窗口区域列表
-            var appWindows = [Dictionary<String, AnyObject>]()
+            var appWindows = [[String: AnyObject]]()
             //检测当前屏幕上所有的可见窗口
             if let windowList = CGWindowListCopyWindowInfo([.excludeDesktopElements,.optionOnScreenOnly], kCGNullWindowID) as? [[String: AnyObject]] {
-                var visibleWindows = windowList.filter{ levelWhiteList.contains(CGWindowLevel($0["kCGWindowLayer"] as! Int))}
-                if !cleanMode { visibleWindows = windowList.filter{ !levelBlackList.contains(CGWindowLevel($0["kCGWindowLayer"] as! Int))} }
-                let windowInAppList = visibleWindows.filter{ appList.contains($0["kCGWindowOwnerName"] as! String) && $0["kCGWindowAlpha"] as! Float != 0.0 }
-                let wc: [String] = windowInAppList.map{
-                    let size = NSStringFromSize((CGRect(dictionaryRepresentation: $0[kCGWindowBounds as String] as! CFDictionary)!).size)
-                    let layer = $0[kCGWindowLayer as String] as! Int
-                    return "\(size) \(layer)"
-                }
+                var visibleWindows = windowList.filter{ levelWhiteList.contains(getLayer($0)) && getAlpha($0) > 0 && getBound($0).size.height > 50}
+                if !cleanMode { visibleWindows = windowList.filter{ !levelBlackList.contains(getLayer($0))} }
+                let windowInAppList = visibleWindows.filter{ appList.contains(getOwner($0)) }
+                let wc: [String] = windowInAppList.map{ return "\(NSStringFromSize(getBound($0).size)),\(getLayer($0))" }
                 if (wc.count != windowsCount.count) || (Set(wc) != Set(windowsCount)) { getWindowAttribs(); getFullScreen() }
                 windowsCount = wc
-                for window in windowInAppList {
-                    if !cleanMode { appWindows.append(window); continue }
+                for w in windowInAppList {
+                    if !cleanMode { appWindows.append(w); continue }
                     //获取窗口基本信息
-                    let owner = window[kCGWindowOwnerName as String] as! String
-                    let size = CGRect(dictionaryRepresentation: window[kCGWindowBounds as String] as! CFDictionary)!.size
-                    let attribs = unStandardWindows.filter{ $0.first as! String == owner && $0.last as! CGSize == size }
+                    let owner = getOwner(w)
+                    //let boundCG = CGRect(dictionaryRepresentation: window[kCGWindowBounds as String] as! CFDictionary)!
+                    let bound = getBound(w)
+                    let layer = getLayer(w)
+                    let attribs = unStandardWindows.filter{ $0.first as! String == owner && $0.last as! CGSize == bound.size }
                     if attribs.count != 0 {
-                        if isFullScreen(window) { appWindows.append(window); continue }
-                        let layer = window[kCGWindowLayer as String] as! Int
+                        if isFullScreen(bound) { appWindows.append(w); continue }
                         let childen = attribs.first?[1] as! Int
                         let subrole = attribs.first?[2] as! String
-                        if (layer == 0 && subrole == "AXUnknown") || subRoleBlackList.contains(subrole) || childen < 1 { continue } else { appWindows.append(window) }
+                        if (layer == 0 && subrole == "AXUnknown") {
+                            let c = windowInAppList.filter{ let b = getBound($0); return getOwner($0) == owner && b != bound && NSContainsRect(b, bound) }
+                            if c.count < 1 { appWindows.append(w) }
+                        } else if !subRoleBlackList.contains(subrole) && childen > 0 {
+                            appWindows.append(w)
+                        }
+                    }else{
+                        appWindows.append(w)
                     }
                 }
                 createMask(fApp, appWindows)
             } else {
-                alert("出现错误".local(), "无法获取窗口列表!".local(), "退出".local())
+                alert("出现错误".local, "无法获取窗口列表!".local, "退出".local)
                 NSApplication.shared.terminate(self)
             }
         }else{
