@@ -14,7 +14,7 @@
 ### 安装:
 可[点此下载](https://github.com/lihaoyun6/AppDimmer/releases/latest)最新版安装文件. 或使用homebrew安装:  
 ```bash
-brew install lihaoyun6/tap/appdimmer --cask
+brew install lihaoyun6/tap/appdimmer
 ```
 ### 使用:
 AppDimmer启动后会在菜单栏显示图标, 点击图标并拖动滑块可对遮罩强度进行调整.  
