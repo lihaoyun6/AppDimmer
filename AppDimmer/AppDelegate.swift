@@ -21,7 +21,7 @@ class NNSWindow : NSWindow {
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
-    
+    var observer: Any!
     var timer: Timer?
     var level = UserDefaults.standard.integer(forKey: "level")
     var disable = UserDefaults.standard.bool(forKey: "disable")
@@ -73,13 +73,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         //获取自启代理状态
         foundHelper = NSWorkspace.shared.runningApplications.contains { $0.bundleIdentifier == helperBundleName }
         
-        //初始化定时器
-        timer = Timer(timeInterval: 0.06, repeats: true, block: {timer in self.loopFireHandler(timer)})
-        RunLoop.main.add(timer!, forMode: .common)
-        
         //生成主菜单
         menuIcon()
         menuWillOpen(menu)
+        if !disable { startTimer() }
+        
+        //创建事件侦听
+        NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(sleepListener(_:)), name: NSWorkspace.willSleepNotification, object: nil)
+        NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(sleepListener(_:)), name: NSWorkspace.didWakeNotification, object: nil)
+        observer = NSApp.observe(\.effectiveAppearance) { _, _ in self.isDarkMode() }
     }
     
     func applicationWillTerminate(_ aNotification: Notification) {
@@ -92,6 +94,24 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     func windows() -> Array<NSWindow>{
         return NSApplication.shared.windows.filter{$0.className == "AppDimmer.NNSWindow"}
+    }
+    
+    func startTimer() {
+        timer = Timer(timeInterval: 0.06, repeats: true, block: {timer in self.loopFireHandler(timer)})
+        RunLoop.main.add(timer!, forMode: .common)
+    }
+    
+    func stopTimer() {
+        timer?.invalidate()
+        for w in windows() {w.orderOut(self)}
+    }
+    
+    @objc func sleepListener(_ aNotification: Notification) {
+        if aNotification.name == NSWorkspace.willSleepNotification {
+            timer?.invalidate()
+        } else if aNotification.name == NSWorkspace.didWakeNotification {
+            startTimer()
+        }
     }
     
     //显示关于窗口
@@ -181,6 +201,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     //总开关
     func setDisable() {
         disable.toggle()
+        if !disable { startTimer() } else { stopTimer() }
         statusItem.button?.image = NSImage(named:NSImage.Name("MenuBarIcon\(NSNumber(value: !disable).intValue)"))
         UserDefaults.standard.set(disable, forKey: "disable")
     }
@@ -219,8 +240,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menuSlider.isEnabled = !disable
         menuSlider.isContinuous = true
         menuSlider.action = #selector(sliderValueChanged(_:))
-        menuSlider.minValue = 1
-        menuSlider.maxValue = 99
+        menuSlider.minValue = 10
+        menuSlider.maxValue = 90
         menuSlider.intValue = Int32(100-level)
         menuSliderItem.view = view
         menu.insertItem(menuSliderItem, at: 0)
@@ -241,11 +262,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     //深色模式检测函数
-    func isDarkMode() -> Bool {
-        if !darkOnly { return true }
-        let dark = NSApplication.shared.effectiveAppearance.debugDescription.lowercased()
-        if dark.contains("dark") { return true }
-        return false
+    func isDarkMode() {
+        if darkOnly {
+            if NSApp.effectiveAppearance.name == NSAppearance.Name.darkAqua { startTimer() } else { stopTimer() }
+        }
     }
     
     //获取提示字符串
@@ -291,10 +311,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 guard let windows = try? uiApp.windows() ?? [] else {return}
                 for window in windows {
                     guard let attribs = try? window.getMultipleAttributes(.position, .size, .fullScreen) else {return}
-                    let fScreen = (attribs[AXSwift.Attribute.fullScreen] ?? 0) as! Int
+                    let fScreen = (attribs[.fullScreen] ?? 0) as! Int
                     if fScreen == 1 {
-                        let posi = (attribs[AXSwift.Attribute.position] ?? (0.0, 0.0)) as! CGPoint
-                        let size = (attribs[AXSwift.Attribute.size] ?? (0.0, 0.0)) as! CGSize
+                        let posi = (attribs[.position] ?? (0.0, 0.0)) as! CGPoint
+                        let size = (attribs[.size] ?? (0.0, 0.0)) as! CGSize
                         let rect = self.CGtoNS(CGRect(origin: posi, size: size))
                         self.fullScreenWindows.append(rect)
                     }
@@ -352,47 +372,42 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     //循环体
     @objc func loopFireHandler(_ timer: Timer?) -> Void {
         fApp = NSWorkspace.shared.frontmostApplication?.localizedName ?? ""
-        //检测启动条件
-        if isDarkMode() && !disable && level != 1 {
-            //声明窗口区域列表
-            var appWindows = [[String: AnyObject]]()
-            //检测当前屏幕上所有的可见窗口
-            if let windowList = CGWindowListCopyWindowInfo([.excludeDesktopElements,.optionOnScreenOnly], kCGNullWindowID) as? [[String: AnyObject]] {
-                var visibleWindows = windowList.filter{ levelWhiteList.contains(getLayer($0)) && getAlpha($0) > 0 && getBound($0).size.height > 50}
-                if !cleanMode { visibleWindows = windowList.filter{ !levelBlackList.contains(getLayer($0))} }
-                let windowInAppList = visibleWindows.filter{ appList.contains(getOwner($0)) }
-                let wc: [String] = windowInAppList.map{ return "\(NSStringFromSize(getBound($0).size)),\(getLayer($0))" }
-                if (wc.count != windowsCount.count) || (Set(wc) != Set(windowsCount)) { getWindowAttribs(); getFullScreen() }
-                windowsCount = wc
-                for w in windowInAppList {
-                    if !cleanMode { appWindows.append(w); continue }
-                    //获取窗口基本信息
-                    let owner = getOwner(w)
-                    //let boundCG = CGRect(dictionaryRepresentation: window[kCGWindowBounds as String] as! CFDictionary)!
-                    let bound = getBound(w)
-                    let layer = getLayer(w)
-                    let attribs = unStandardWindows.filter{ $0.first as! String == owner && $0.last as! CGSize == bound.size }
-                    if attribs.count != 0 {
-                        if isFullScreen(bound) { appWindows.append(w); continue }
-                        let childen = attribs.first?[1] as! Int
-                        let subrole = attribs.first?[2] as! String
-                        if (layer == 0 && subrole == "AXUnknown") {
-                            let c = windowInAppList.filter{ let b = getBound($0); return getOwner($0) == owner && b != bound && NSContainsRect(b, bound) }
-                            if c.count < 1 { appWindows.append(w) }
-                        } else if !subRoleBlackList.contains(subrole) && childen > 0 {
-                            appWindows.append(w)
-                        }
-                    }else{
-                        //appWindows.append(w)
+        //声明窗口区域列表
+        var appWindows = [[String: AnyObject]]()
+        //检测当前屏幕上所有的可见窗口
+        if let windowList = CGWindowListCopyWindowInfo([.excludeDesktopElements,.optionOnScreenOnly], kCGNullWindowID) as? [[String: AnyObject]] {
+            var visibleWindows = windowList.filter{ levelWhiteList.contains(getLayer($0)) && getAlpha($0) > 0 && getBound($0).size.height > 50}
+            if !cleanMode { visibleWindows = windowList.filter{ !levelBlackList.contains(getLayer($0))} }
+            let windowInAppList = visibleWindows.filter{ appList.contains(getOwner($0)) }
+            let wc: [String] = windowInAppList.map{ return "\(NSStringFromSize(getBound($0).size)),\(getLayer($0))" }
+            if (wc.count != windowsCount.count) || (Set(wc) != Set(windowsCount)) { getWindowAttribs(); getFullScreen() }
+            windowsCount = wc
+            for w in windowInAppList {
+                if !cleanMode { appWindows.append(w); continue }
+                //获取窗口基本信息
+                let owner = getOwner(w)
+                //let boundCG = CGRect(dictionaryRepresentation: window[kCGWindowBounds as String] as! CFDictionary)!
+                let bound = getBound(w)
+                let layer = getLayer(w)
+                let attribs = unStandardWindows.filter{ $0.first as! String == owner && $0.last as! CGSize == bound.size }
+                if attribs.count != 0 {
+                    if isFullScreen(bound) { appWindows.append(w); continue }
+                    let childen = attribs.first?[1] as! Int
+                    let subrole = attribs.first?[2] as! String
+                    if (layer == 0 && subrole == "AXUnknown") {
+                        let c = windowInAppList.filter{ let b = getBound($0); return getOwner($0) == owner && b != bound && NSContainsRect(b, bound) }
+                        if c.count < 1 { appWindows.append(w) }
+                    } else if !subRoleBlackList.contains(subrole) && childen > 0 {
+                        appWindows.append(w)
                     }
+                }else{
+                    //appWindows.append(w)
                 }
-                createMask(fApp, appWindows)
-            } else {
-                alert("出现错误".local, "无法获取窗口列表!".local, "退出".local)
-                NSApplication.shared.terminate(self)
             }
-        }else{
-            for w in windows() {w.orderOut(self)}
+            createMask(fApp, appWindows)
+        } else {
+            alert("出现错误".local, "无法获取窗口列表!".local, "退出".local)
+            NSApplication.shared.terminate(self)
         }
     }
 }
