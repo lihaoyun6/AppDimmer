@@ -76,8 +76,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         //生成主菜单
         menuIcon()
         menuWillOpen(menu)
-        if !disable { startTimer() }
-        isDarkMode()
+        if !disable { isDarkMode() }
         
         //创建事件侦听
         NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(sleepListener(_:)), name: NSWorkspace.willSleepNotification, object: nil)
@@ -204,7 +203,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     //总开关
     func setDisable() {
         disable.toggle()
-        if !disable { startTimer() } else { stopTimer() }
+        if !disable { isDarkMode() } else { stopTimer() }
         statusItem.button?.image = NSImage(named:NSImage.Name("MenuBarIcon\(NSNumber(value: !disable).intValue)"))
         UserDefaults.standard.set(disable, forKey: "disable")
     }
@@ -220,6 +219,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     //主菜单生成函数
     func menuWillOpen(_ menu: NSMenu) {
+        fApp = NSWorkspace.shared.frontmostApplication?.localizedName ?? ""
         menu.removeAllItems()
         options.removeAllItems()
         menu.delegate = self
@@ -376,7 +376,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     //循环体
     @objc func loopFireHandler(_ timer: Timer?) -> Void {
-        fApp = NSWorkspace.shared.frontmostApplication?.localizedName ?? ""
         //声明窗口区域列表
         var appWindows = [[String: AnyObject]]()
         //检测当前屏幕上所有的可见窗口
@@ -409,7 +408,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     //appWindows.append(w)
                 }
             }
-            createMask(fApp, appWindows)
+            createMask(NSWorkspace.shared.frontmostApplication?.localizedName ?? "", appWindows)
         } else {
             alert("出现错误".local, "无法获取窗口列表!".local, "退出".local)
             NSApplication.shared.terminate(self)
