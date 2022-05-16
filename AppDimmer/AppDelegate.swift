@@ -77,6 +77,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menuIcon()
         menuWillOpen(menu)
         if !disable { startTimer() }
+        isDarkMode()
         
         //创建事件侦听
         NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(sleepListener(_:)), name: NSWorkspace.willSleepNotification, object: nil)
@@ -97,6 +98,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     func startTimer() {
+        timer?.invalidate()
         timer = Timer(timeInterval: 0.06, repeats: true, block: {timer in self.loopFireHandler(timer)})
         RunLoop.main.add(timer!, forMode: .common)
     }
@@ -153,6 +155,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     //设置"仅在深色模式生效"
     @objc func setDarkOnly(_ sender: NSMenuItem) {
         darkOnly.toggle()
+        isDarkMode()
         sender.state = state(darkOnly)
         UserDefaults.standard.set(darkOnly, forKey: "darkOnly")
     }
@@ -265,6 +268,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func isDarkMode() {
         if darkOnly {
             if NSApp.effectiveAppearance.name == NSAppearance.Name.darkAqua { startTimer() } else { stopTimer() }
+        }else{
+            startTimer()
         }
     }
     
