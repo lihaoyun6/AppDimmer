@@ -111,7 +111,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if aNotification.name == NSWorkspace.willSleepNotification {
             timer?.invalidate()
         } else if aNotification.name == NSWorkspace.didWakeNotification {
-            startTimer()
+            if !disable { isDarkMode() }
         }
     }
     
