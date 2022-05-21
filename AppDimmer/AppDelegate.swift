@@ -28,6 +28,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var darkOnly = UserDefaults.standard.bool(forKey: "darkOnly")
     var cleanMode = UserDefaults.standard.bool(forKey: "cleanMode")
     var appList = (UserDefaults.standard.array(forKey: "appList") ?? []) as! [String]
+    var menuBarCount = [String]()
     var windowsCount = [String]()
     var unStandardWindows = [Array<Any>]()
     var fullScreenWindows = [NSRect]()
@@ -380,6 +381,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         var appWindows = [[String: AnyObject]]()
         //检测当前屏幕上所有的可见窗口
         if let windowList = CGWindowListCopyWindowInfo([.excludeDesktopElements,.optionOnScreenOnly], kCGNullWindowID) as? [[String: AnyObject]] {
+            let mc: [String] = windowList.filter{ getOwner($0) == "SystemUIServer" }.map{ NSStringFromRect(getBound($0)) }
+            if mc != menuBarCount { menuBarCount = mc; return }
             var visibleWindows = windowList.filter{ levelWhiteList.contains(getLayer($0)) && getAlpha($0) > 0 && getBound($0).size.height > 50}
             if !cleanMode { visibleWindows = windowList.filter{ !levelBlackList.contains(getLayer($0))} }
             let windowInAppList = visibleWindows.filter{ appList.contains(getOwner($0)) }
@@ -390,7 +393,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 if !cleanMode { appWindows.append(w); continue }
                 //获取窗口基本信息
                 let owner = getOwner(w)
-                //let boundCG = CGRect(dictionaryRepresentation: window[kCGWindowBounds as String] as! CFDictionary)!
                 let bound = getBound(w)
                 let layer = getLayer(w)
                 let attribs = unStandardWindows.filter{ $0.first as! String == owner && $0.last as! CGSize == bound.size }
