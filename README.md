@@ -12,7 +12,7 @@
 
 ## 安装与使用
 ### 安装:
-可[点此下载](https://github.com/lihaoyun6/AppDimmer/releases/latest)最新版安装文件. 或使用homebrew安装:  
+可[点此前往](../../releases)下载最新版安装文件. 或使用homebrew安装:  
 ```bash
 brew install lihaoyun6/tap/appdimmer
 ```
