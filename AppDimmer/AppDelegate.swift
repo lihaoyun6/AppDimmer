@@ -14,6 +14,14 @@ extension String {
     var local: String { return NSLocalizedString(self, comment: "") }
 }
 
+//扩展Bundle类
+extension Bundle {
+    var name: String? {
+        if let name = object(forInfoDictionaryKey: "CFBundleDisplayName") as? String { if name != "" { return name } }
+        return object(forInfoDictionaryKey: "CFBundleName") as? String
+    }
+}
+
 //重写constrainFrameRect以支持从可见区域外绘制窗口
 class NNSWindow : NSWindow {
     override func constrainFrameRect(_ frameRect: NSRect, to screen: NSScreen?) -> NSRect { return frameRect }
@@ -23,17 +31,18 @@ class NNSWindow : NSWindow {
 class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var observer: Any!
     var timer: Timer?
+    var pids = [Int: String]()
     var level = UserDefaults.standard.integer(forKey: "level")
     var disable = UserDefaults.standard.bool(forKey: "disable")
     var darkOnly = UserDefaults.standard.bool(forKey: "darkOnly")
-    var cleanMode = UserDefaults.standard.bool(forKey: "cleanMode")
     var appList = (UserDefaults.standard.array(forKey: "appList") ?? []) as! [String]
+    var lazyList = (UserDefaults.standard.array(forKey: "layzList") ?? []) as! [String]
     var menuBarCount = [String]()
     var windowsCount = [String]()
     var unStandardWindows = [Array<Any>]()
     var fullScreenWindows = [NSRect]()
     var statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.variableLength)
-    var fApp = NSWorkspace.shared.frontmostApplication?.localizedName ?? ""
+    var fApp = ""
     var foundHelper = false
     let menu = NSMenu()
     let options = NSMenu()
@@ -64,13 +73,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if level == 0{
             level = 30
             darkOnly = true
-            cleanMode = true
             UserDefaults.standard.set(level, forKey: "level")
             UserDefaults.standard.set(darkOnly, forKey: "darkOnly")
-            UserDefaults.standard.set(cleanMode, forKey: "cleanMode")
         }
         //检查辅助功能权限
-        if cleanMode {_ = UIElement.isProcessTrusted(withPrompt: true)}
+        _ = UIElement.isProcessTrusted(withPrompt: true)
         //获取自启代理状态
         foundHelper = NSWorkspace.shared.runningApplications.contains { $0.bundleIdentifier == helperBundleName }
         
@@ -174,20 +181,25 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
     
+    //添加到懒惰名单
+    @objc func editLayzList(_ sender: NSMenuItem) {
+        if fApp != "" && fApp != "AppDimmer"{
+            if !lazyList.contains(fApp){
+                sender.state = state(true)
+                lazyList.append(fApp)
+            } else {
+                sender.state = state(false)
+                lazyList = lazyList.filter{$0 != fApp}
+            }
+            UserDefaults.standard.set(lazyList, forKey: "lazyList")
+        }
+    }
+    
     //设置"登录时启动"
     @objc func setRunAtLogin(_ sender: NSMenuItem) {
         foundHelper.toggle()
         SMLoginItemSetEnabled(helperBundleName as CFString, foundHelper)
         sender.state = state(foundHelper)
-    }
-    
-    //设置窗口匹配模式
-    @objc func setCleanMode(_ sender: NSMenuItem) {
-        cleanMode.toggle()
-        windowsCount.removeAll()
-        if cleanMode {_ = UIElement.isProcessTrusted(withPrompt: true)}
-        sender.state = state(cleanMode)
-        UserDefaults.standard.set(cleanMode, forKey: "cleanMode")
     }
     
     //菜单栏按钮左右键响应
@@ -220,19 +232,24 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     //主菜单生成函数
     func menuWillOpen(_ menu: NSMenu) {
-        fApp = NSWorkspace.shared.frontmostApplication?.localizedName ?? ""
+        fApp = getAppName(NSWorkspace.shared.frontmostApplication?.bundleURL)
+        let enable = appList.contains(fApp)
         menu.removeAllItems()
         options.removeAllItems()
         menu.delegate = self
         menu.autoenablesItems = false
         //menu.addItem(NSMenuItem.separator())
         let Switch = menu.addItem(withTitle: "\(fApp): \(getEnableText(fApp))", action: #selector(editAppList(_:)), keyEquivalent: "")
+        let lazyMode = NSMenuItem(title: "窗口筛选器".local, action: #selector(editLayzList(_:)), keyEquivalent: "")
+        lazyMode.isEnabled = enable
+        lazyMode.state = state(enable && !lazyList.contains(fApp))
+        menu.addItem(lazyMode)
         menu.addItem(NSMenuItem.separator())
         menu.setSubmenu(options, for: menu.addItem(withTitle: "偏好设置...".local, action: nil, keyEquivalent: ""))
         options.addItem(withTitle: "登录时启动".local, action: #selector(setRunAtLogin(_:)), keyEquivalent: "").state = state(foundHelper)
         options.addItem(NSMenuItem.separator())
         options.addItem(withTitle: "跟随系统主题".local, action: #selector(setDarkOnly(_:)), keyEquivalent: "").state = state(darkOnly)
-        options.addItem(withTitle: "减少鬼影".local, action: #selector(setCleanMode(_:)), keyEquivalent: "").state = state(cleanMode)
+        //options.addItem(withTitle: "减少鬼影".local, action: #selector(setCleanMode(_:)), keyEquivalent: "").state = state(cleanMode)
         menu.addItem(withTitle: "关于 AppDimmer".local, action: #selector(aboutDialog(_:)), keyEquivalent: "")
         menu.addItem(NSMenuItem.separator())
         menu.addItem(withTitle: "退出".local, action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
@@ -274,6 +291,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
     
+    //获取App名称
+    func getAppName(_ appUrl: URL?) -> String {
+        if appUrl?.absoluteString == nil { return "" }
+        return Bundle(url: appUrl!)?.name ?? ""
+    }
+    
     //获取提示字符串
     func getEnableText(_ name: String) -> String {
         if appList.contains(name) { return "已启用".local }
@@ -289,9 +312,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     //通过辅助功能权限获取窗口属性
     func getWindowAttribs() {
-        if cleanMode && UIElement.isProcessTrusted() {
+        if UIElement.isProcessTrusted() {
             unStandardWindows.removeAll()
-            let apps = NSWorkspace.shared.runningApplications.filter{appList.contains($0.localizedName ?? "")}
+            let apps = NSWorkspace.shared.runningApplications.filter{appList.contains(getAppName($0.bundleURL))}
             for app in apps {
                 let uiApp = Application(app)!
                 guard let windows = try? uiApp.windows() ?? [] else {return}
@@ -300,7 +323,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     let children = (attribs[.children] ?? ()) as AnyObject
                     let subrole = (attribs[.subrole] ?? "") as AnyObject
                     let size = (attribs[.size] ?? (0.0, 0.0)) as! CGSize
-                    unStandardWindows.append([app.localizedName ?? "", children.count ?? 0, subrole as! String, size])
+                    unStandardWindows.append([getAppName(app.bundleURL), children.count ?? 0, subrole as! String, size])
                 }
             }
         }
@@ -311,7 +334,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         Thread.detachNewThread {
             usleep(700000)
             self.fullScreenWindows.removeAll()
-            let apps = NSWorkspace.shared.runningApplications.filter{self.appList.contains($0.localizedName ?? "")}
+            let apps = NSWorkspace.shared.runningApplications.filter{self.appList.contains(self.getAppName($0.bundleURL))}
             for app in apps {
                 let uiApp = Application(app)!
                 guard let windows = try? uiApp.windows() ?? [] else {return}
@@ -339,11 +362,27 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func getLayer(_ w: [String: AnyObject]) -> Int { return (w["kCGWindowLayer"] as! NSNumber).intValue }
     func getAlpha(_ w: [String: AnyObject]) -> Int { return (w["kCGWindowAlpha"] as! NSNumber).intValue }
     func getNumber(_ w: [String: AnyObject]) -> Int { return (w["kCGWindowNumber"] as! NSNumber).intValue }
-    func getOwner(_ w: [String: AnyObject]) -> String { return w["kCGWindowOwnerName"] as! String }
     func getBound(_ w: [String: AnyObject]) -> CGRect { return CGtoNS(CGRect(dictionaryRepresentation: w["kCGWindowBounds"] as! CFDictionary)!) }
+    func getOwner(_ w: [String: AnyObject]) -> String {
+        let name = w["kCGWindowOwnerName"] as! String
+        if name.contains("pid=") {
+            let pid = w["kCGWindowOwnerPID"] as! Int
+            if let name = pids[pid] { return name }
+            for app in NSWorkspace.shared.runningApplications {
+                if app.processIdentifier == pid {
+                    let name = getAppName(app.bundleURL)
+                    pids.updateValue(name, forKey: pid)
+                    return name
+                }
+            }
+            return ""
+        }
+        return name
+    }
     
     //批量生成遮罩窗体
-    func createMask(_ frontVisibleAppName: String, _ appWindows: [Dictionary<String, AnyObject>]){
+    func createMask(_ appWindows: [Dictionary<String, AnyObject>]){
+        let frontVisibleAppName = getAppName(NSWorkspace.shared.frontmostApplication?.bundleURL)
         let maskList = windows()
         let mc = maskList.count
         let n = appWindows.count - mc
@@ -383,18 +422,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if let windowList = CGWindowListCopyWindowInfo([.excludeDesktopElements,.optionOnScreenOnly], kCGNullWindowID) as? [[String: AnyObject]] {
             let mc: [String] = windowList.filter{ getOwner($0) == "SystemUIServer" }.map{ NSStringFromRect(getBound($0)) }
             if mc != menuBarCount { menuBarCount = mc; return }
-            var visibleWindows = windowList.filter{ levelWhiteList.contains(getLayer($0)) && getAlpha($0) > 0 && getBound($0).size.height > 50}
-            if !cleanMode { visibleWindows = windowList.filter{ !levelBlackList.contains(getLayer($0))} }
+            let visibleWindows = windowList.filter{ levelWhiteList.contains(getLayer($0)) && getAlpha($0) > 0 && getBound($0).size.height > 50}
             let windowInAppList = visibleWindows.filter{ appList.contains(getOwner($0)) }
             let wc: [String] = windowInAppList.map{ return "\(NSStringFromSize(getBound($0).size)),\(getLayer($0))" }
             if (wc.count != windowsCount.count) || (Set(wc) != Set(windowsCount)) { getWindowAttribs(); getFullScreen() }
             windowsCount = wc
             for w in windowInAppList {
-                if !cleanMode { appWindows.append(w); continue }
                 //获取窗口基本信息
                 let owner = getOwner(w)
-                let bound = getBound(w)
+                if lazyList.contains(owner) { appWindows.append(w); continue }
                 let layer = getLayer(w)
+                if levelBlackList.contains(layer) { continue }
+                let bound = getBound(w)
                 let attribs = unStandardWindows.filter{ $0.first as! String == owner && $0.last as! CGSize == bound.size }
                 if attribs.count != 0 {
                     if isFullScreen(bound) { appWindows.append(w); continue }
@@ -410,7 +449,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     //appWindows.append(w)
                 }
             }
-            createMask(NSWorkspace.shared.frontmostApplication?.localizedName ?? "", appWindows)
+            createMask(appWindows)
         } else {
             alert("出现错误".local, "无法获取窗口列表!".local, "退出".local)
             NSApplication.shared.terminate(self)
