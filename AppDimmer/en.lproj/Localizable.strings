@@ -7,12 +7,15 @@
 */
 "登录时启动" = "Launch at Login";
 "跟随系统主题" = "Follow System Theme";
+"在截图中显示" = "Show in Screenshot";
+"刷新率..." = "Refresh Rate...";
 "关于 AppDimmer" = "About AppDimmer";
 "退出" = "Quit";
 "出现错误" = "Unknown Error";
 "无法获取窗口列表!" = "Unable to get windows list!";
 "偏好设置..." = "Preferences...";
 "窗口筛选器" = "Layout Analyzer";
+"反转颜色" = "Invert Colors";
 "亮度: " = "Brightness: ";
 "已启用" = "Enabled";
 "未启用" = "Disabled";

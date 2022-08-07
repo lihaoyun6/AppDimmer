@@ -32,11 +32,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var observer: Any!
     var timer: Timer?
     var pids = [Int: String]()
+    var fps = UserDefaults.standard.integer(forKey: "fps")
     var level = UserDefaults.standard.integer(forKey: "level")
     var disable = UserDefaults.standard.bool(forKey: "disable")
     var darkOnly = UserDefaults.standard.bool(forKey: "darkOnly")
+    var allowShot = UserDefaults.standard.bool(forKey: "allowShot")
     var appList = (UserDefaults.standard.array(forKey: "appList") ?? []) as! [String]
-    var lazyList = (UserDefaults.standard.array(forKey: "layzList") ?? []) as! [String]
+    var lazyList = (UserDefaults.standard.array(forKey: "lazyList") ?? []) as! [String]
+    var invList = (UserDefaults.standard.array(forKey: "invList") ?? []) as! [String]
     var menuBarCount = [String]()
     var windowsCount = [String]()
     var unStandardWindows = [Array<Any>]()
@@ -45,7 +48,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var fApp = ""
     var foundHelper = false
     let menu = NSMenu()
-    let options = NSMenu()
     let helperBundleName = "com.lihaoyun6.AppDimmerLoginHelper"
     let subRoleBlackList = ["AXSystemDialog"]
     let levelWhiteList = [0,1,3,8,20,1000]
@@ -76,6 +78,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             UserDefaults.standard.set(level, forKey: "level")
             UserDefaults.standard.set(darkOnly, forKey: "darkOnly")
         }
+        if fps == 0 { fps = 15 ; UserDefaults.standard.set(fps, forKey: "fps") }
         //检查辅助功能权限
         _ = UIElement.isProcessTrusted(withPrompt: true)
         //获取自启代理状态
@@ -87,8 +90,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if !disable { isDarkMode() }
         
         //创建事件侦听
-        NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(sleepListener(_:)), name: NSWorkspace.willSleepNotification, object: nil)
-        NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(sleepListener(_:)), name: NSWorkspace.didWakeNotification, object: nil)
+        //NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(sleepListener(_:)), name: NSWorkspace.willSleepNotification, object: nil)
+        //NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(sleepListener(_:)), name: NSWorkspace.didWakeNotification, object: nil)
         observer = NSApp.observe(\.effectiveAppearance) { _, _ in self.isDarkMode() }
     }
     
@@ -106,22 +109,22 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     func startTimer() {
         timer?.invalidate()
-        timer = Timer(timeInterval: 0.06, repeats: true, block: {timer in self.loopFireHandler(timer)})
+        timer = Timer(timeInterval: TimeInterval(1.0/Float(fps)), repeats: true, block: {timer in self.loopFireHandler(timer)})
         RunLoop.main.add(timer!, forMode: .common)
     }
     
     func stopTimer() {
         timer?.invalidate()
-        for w in windows() {w.orderOut(self)}
+        for w in windows() {w.close()}
     }
     
-    @objc func sleepListener(_ aNotification: Notification) {
-        if aNotification.name == NSWorkspace.willSleepNotification {
-            timer?.invalidate()
-        } else if aNotification.name == NSWorkspace.didWakeNotification {
-            if !disable { isDarkMode() }
-        }
-    }
+    //@objc func sleepListener(_ aNotification: Notification) {
+    //    if aNotification.name == NSWorkspace.willSleepNotification {
+    //        timer?.invalidate()
+    //    } else if aNotification.name == NSWorkspace.didWakeNotification {
+    //        if !disable { isDarkMode() }
+    //    }
+    //}
     
     //显示关于窗口
     @objc func aboutDialog(_ sender: Any?) {
@@ -159,12 +162,26 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         return myPopup.runModal() == NSApplication.ModalResponse.alertFirstButtonReturn
     }
     
+    //设置刷新率
+    @objc func setFPS(_ sender: NSMenuItem) {
+        fps = Int(sender.title.replacingOccurrences(of: "FPS", with: "")) ?? 15
+        UserDefaults.standard.set(fps, forKey: "fps")
+        startTimer()
+    }
+    
     //设置"仅在深色模式生效"
     @objc func setDarkOnly(_ sender: NSMenuItem) {
         darkOnly.toggle()
         isDarkMode()
         sender.state = state(darkOnly)
         UserDefaults.standard.set(darkOnly, forKey: "darkOnly")
+    }
+    
+    //设置"截屏时显示"
+    @objc func setallowShot(_ sender: NSMenuItem) {
+        allowShot.toggle()
+        sender.state = state(allowShot)
+        UserDefaults.standard.set(allowShot, forKey: "allowShot")
     }
     
     //添加到匹配名单
@@ -185,13 +202,28 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc func editLayzList(_ sender: NSMenuItem) {
         if fApp != "" && fApp != "AppDimmer"{
             if !lazyList.contains(fApp){
-                sender.state = state(true)
+                sender.state = state(false)
                 lazyList.append(fApp)
             } else {
-                sender.state = state(false)
+                sender.state = state(true)
                 lazyList = lazyList.filter{$0 != fApp}
             }
             UserDefaults.standard.set(lazyList, forKey: "lazyList")
+        }
+    }
+    
+    //添加到反色名单
+    @objc func editInvList(_ sender: NSMenuItem) {
+        if fApp != "" && fApp != "AppDimmer"{
+            if !invList.contains(fApp){
+                sender.state = state(true)
+                invList.append(fApp)
+            } else {
+                sender.state = state(false)
+                invList = invList.filter{$0 != fApp}
+                for w in windows() {w.close()}
+            }
+            UserDefaults.standard.set(invList, forKey: "invList")
         }
     }
     
@@ -235,21 +267,31 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         fApp = getAppName(NSWorkspace.shared.frontmostApplication?.bundleURL)
         let enable = appList.contains(fApp)
         menu.removeAllItems()
-        options.removeAllItems()
+        let options = NSMenu()
+        let chooseFps = NSMenu()
         menu.delegate = self
         menu.autoenablesItems = false
-        //menu.addItem(NSMenuItem.separator())
         let Switch = menu.addItem(withTitle: "\(fApp): \(getEnableText(fApp))", action: #selector(editAppList(_:)), keyEquivalent: "")
         let lazyMode = NSMenuItem(title: "窗口筛选器".local, action: #selector(editLayzList(_:)), keyEquivalent: "")
-        lazyMode.isEnabled = enable
-        lazyMode.state = state(enable && !lazyList.contains(fApp))
+        let invMode = NSMenuItem(title: "反转颜色".local, action: #selector(editInvList(_:)), keyEquivalent: "")
+        lazyMode.isEnabled = enable && !invList.contains(fApp)
+        invMode.isEnabled = enable
+        lazyMode.state = state(enable && !lazyList.contains(fApp) && !invList.contains(fApp))
+        invMode.state = state(enable && invList.contains(fApp))
         menu.addItem(lazyMode)
+        menu.addItem(invMode)
         menu.addItem(NSMenuItem.separator())
         menu.setSubmenu(options, for: menu.addItem(withTitle: "偏好设置...".local, action: nil, keyEquivalent: ""))
         options.addItem(withTitle: "登录时启动".local, action: #selector(setRunAtLogin(_:)), keyEquivalent: "").state = state(foundHelper)
         options.addItem(NSMenuItem.separator())
         options.addItem(withTitle: "跟随系统主题".local, action: #selector(setDarkOnly(_:)), keyEquivalent: "").state = state(darkOnly)
+        options.addItem(withTitle: "在截图中显示".local, action: #selector(setallowShot(_:)), keyEquivalent: "").state = state(allowShot)
+        options.setSubmenu(chooseFps, for: options.addItem(withTitle: "刷新率...".local, action: nil, keyEquivalent: ""))
+        chooseFps.addItem(withTitle: "60FPS", action: #selector(setFPS(_:)), keyEquivalent: "")
+        chooseFps.addItem(withTitle: "30FPS", action: #selector(setFPS(_:)), keyEquivalent: "")
+        chooseFps.addItem(withTitle: "15FPS", action: #selector(setFPS(_:)), keyEquivalent: "")
         //options.addItem(withTitle: "减少鬼影".local, action: #selector(setCleanMode(_:)), keyEquivalent: "").state = state(cleanMode)
+        chooseFps.item(withTitle: "\(fps)FPS")?.state = state(true)
         menu.addItem(withTitle: "关于 AppDimmer".local, action: #selector(aboutDialog(_:)), keyEquivalent: "")
         menu.addItem(NSMenuItem.separator())
         menu.addItem(withTitle: "退出".local, action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
@@ -258,7 +300,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let view = NSView.init(frame: NSRect(x: 0, y: 0, width: menu.size.width, height: 32))
         view.addSubview(menuSlider)
         menuSlider.sliderType = NSSlider.SliderType.linear
-        menuSlider.isEnabled = !disable
+        menuSlider.isEnabled = enable && !invList.contains(fApp)
         menuSlider.isContinuous = true
         menuSlider.action = #selector(sliderValueChanged(_:))
         menuSlider.minValue = 10
@@ -266,7 +308,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menuSlider.intValue = Int32(100-level)
         menuSliderItem.view = view
         menu.insertItem(menuSliderItem, at: 0)
-        menuSlider.isEnabled = !disable
         Switch.isEnabled = !disable && fApp != "AppDimmer"
         Switch.state = state(appList.contains(fApp))
     }
@@ -316,10 +357,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             unStandardWindows.removeAll()
             let apps = NSWorkspace.shared.runningApplications.filter{appList.contains(getAppName($0.bundleURL))}
             for app in apps {
-                let uiApp = Application(app)!
-                guard let windows = try? uiApp.windows() ?? [] else {return}
+                let uiApp = Application(app)
+                guard let windows = try? uiApp?.windows() ?? [] else {return}
                 for window in windows {
-                    guard let attribs = try? window.getMultipleAttributes(.subrole, .children, .position, .size) else {return}
+                    guard let attribs = try? window.getMultipleAttributes(.subrole, .children, .position, .size, .title) else {return}
                     let children = (attribs[.children] ?? ()) as AnyObject
                     let subrole = (attribs[.subrole] ?? "") as AnyObject
                     let size = (attribs[.size] ?? (0.0, 0.0)) as! CGSize
@@ -336,8 +377,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             self.fullScreenWindows.removeAll()
             let apps = NSWorkspace.shared.runningApplications.filter{self.appList.contains(self.getAppName($0.bundleURL))}
             for app in apps {
-                let uiApp = Application(app)!
-                guard let windows = try? uiApp.windows() ?? [] else {return}
+                let uiApp = Application(app)
+                guard let windows = try? uiApp?.windows() ?? [] else {return}
                 for window in windows {
                     guard let attribs = try? window.getMultipleAttributes(.position, .size, .fullScreen) else {return}
                     let fScreen = (attribs[.fullScreen] ?? 0) as! Int
@@ -386,7 +427,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let maskList = windows()
         let mc = maskList.count
         let n = appWindows.count - mc
-        if n<0 { for i in 1...abs(n) {maskList[mc-i].orderOut(self)} }
+        if n<0 { for i in 1...abs(n) {maskList[mc-i].close()} }
         for (i,w) in appWindows.enumerated(){
             let bound = getBound(w)
             let owner = getOwner(w)
@@ -395,19 +436,33 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             if i == 0 && frontVisibleAppName == owner { layer += 1 }
             var mask: NSWindow!
             if i+1 > mc {
-                mask = NNSWindow(contentRect: .init(origin: .zero, size: .init(width: 0, height: 0)), styleMask: [.titled], backing: .buffered, defer: false)
+                mask = NNSWindow(contentRect: .init(origin: .zero, size: .init(width: 0, height: 0)), styleMask: .titled, backing: .buffered, defer: false)
             }else{
                 mask = maskList[i]
             }
             mask.level = NSWindow.Level.init(rawValue: layer)
-            mask.sharingType = .none
             mask.collectionBehavior = [.transient, .ignoresCycle]
             mask.backgroundColor = NSColor(white: 0.0, alpha: CGFloat(level)/100)
             mask.isOpaque = false
             mask.hasShadow = false
             mask.ignoresMouseEvents = true
+            mask.isReleasedWhenClosed = false
             mask.titlebarAppearsTransparent = true
-            if isFullScreen(bound) { mask.styleMask = .borderless } else { mask.styleMask = .titled }
+            if allowShot { mask.sharingType = .readOnly } else { mask.sharingType = .none }
+            if isFullScreen(bound) {
+                mask.styleMask = .borderless
+            } else if invList.contains(owner) {
+                let windowImage: CGImage? = CGWindowListCreateImage(.null, .optionIncludingWindow, CGWindowID(number), [.boundsIgnoreFraming, .bestResolution])
+                if let image = windowImage {
+                    mask.styleMask = .fullSizeContentView
+                    mask.contentView = NSImageView(image: NSImage(cgImage: image, size: .zero))
+                    mask.contentView?.contentFilters = [CIFilter(name: "CILinearToSRGBToneCurve")!,CIFilter(name: "CIHueAdjust",parameters: [kCIInputAngleKey: Float(1.0 * Double.pi)])!]
+                    mask.contentView?.compositingFilter = CIFilter(name: "CIColorInvert")
+                }
+            } else {
+                mask.styleMask = .titled
+                mask.contentView = nil
+            }
             mask.setFrame(bound, display: true)
             mask.order(.above, relativeTo: number)
             //mask.makeKeyAndOrderFront(self)
@@ -422,7 +477,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if let windowList = CGWindowListCopyWindowInfo([.excludeDesktopElements,.optionOnScreenOnly], kCGNullWindowID) as? [[String: AnyObject]] {
             let mc: [String] = windowList.filter{ getOwner($0) == "SystemUIServer" }.map{ NSStringFromRect(getBound($0)) }
             if mc != menuBarCount { menuBarCount = mc; return }
-            let visibleWindows = windowList.filter{ levelWhiteList.contains(getLayer($0)) && getAlpha($0) > 0 && getBound($0).size.height > 50}
+            let visibleWindows = windowList.filter{ levelWhiteList.contains(getLayer($0)) && getAlpha($0) > 0 }
             let windowInAppList = visibleWindows.filter{ appList.contains(getOwner($0)) }
             let wc: [String] = windowInAppList.map{ return "\(NSStringFromSize(getBound($0).size)),\(getLayer($0))" }
             if (wc.count != windowsCount.count) || (Set(wc) != Set(windowsCount)) { getWindowAttribs(); getFullScreen() }
@@ -430,10 +485,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             for w in windowInAppList {
                 //获取窗口基本信息
                 let owner = getOwner(w)
-                if lazyList.contains(owner) { appWindows.append(w); continue }
+                if lazyList.contains(owner) || invList.contains(owner) { appWindows.append(w); continue }
                 let layer = getLayer(w)
-                if levelBlackList.contains(layer) { continue }
                 let bound = getBound(w)
+                if levelBlackList.contains(layer) || bound.size.height < 50{ continue }
                 let attribs = unStandardWindows.filter{ $0.first as! String == owner && $0.last as! CGSize == bound.size }
                 if attribs.count != 0 {
                     if isFullScreen(bound) { appWindows.append(w); continue }
