@@ -19,3 +19,7 @@
 "亮度: " = "Brightness: ";
 "已启用" = "Enabled";
 "未启用" = "Disabled";
+"透视模式..." = "X-ray Mode...";
+"停用" = "Disable";
+"降级显示" = "Fallback";
+"完全隐藏" = "Disappear";

@@ -13,6 +13,7 @@
 		187FC81B274E4D5D00939612 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 187FC81A274E4D5D00939612 /* Assets.xcassets */; };
 		187FC81E274E4D5D00939612 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 187FC81C274E4D5D00939612 /* Main.storyboard */; };
 		187FC827274E505900939612 /* AppDimmerLoginHelper.app in CopyFiles */ = {isa = PBXBuildFile; fileRef = 187FC814274E4D5B00939612 /* AppDimmerLoginHelper.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		18848DBD28A3ACBB00464138 /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = 18848DBC28A3ACBB00464138 /* HotKey */; };
 		188A0E2E281984FE00ED08BF /* AXSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 188A0E2D281984FE00ED08BF /* AXSwift */; };
 		18FCCF36274B9317005FF1AD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18FCCF35274B9317005FF1AD /* AppDelegate.swift */; };
 		18FCCF3A274B9318005FF1AD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18FCCF39274B9318005FF1AD /* Assets.xcassets */; };
@@ -68,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				18848DBD28A3ACBB00464138 /* HotKey in Frameworks */,
 				188A0E2E281984FE00ED08BF /* AXSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -155,6 +157,7 @@
 			name = AppDimmer;
 			packageProductDependencies = (
 				188A0E2D281984FE00ED08BF /* AXSwift */,
+				18848DBC28A3ACBB00464138 /* HotKey */,
 			);
 			productName = DimQQ;
 			productReference = 18FCCF32274B9317005FF1AD /* AppDimmer.app */;
@@ -192,6 +195,7 @@
 			mainGroup = 18FCCF29274B9317005FF1AD;
 			packageReferences = (
 				188A0E2C281984FE00ED08BF /* XCRemoteSwiftPackageReference "AXSwift" */,
+				18848DBB28A3ACBB00464138 /* XCRemoteSwiftPackageReference "HotKey" */,
 			);
 			productRefGroup = 18FCCF33274B9317005FF1AD /* Products */;
 			projectDirPath = "";
@@ -474,7 +478,7 @@
 				CODE_SIGN_ENTITLEMENTS = AppDimmer/AppDimmer.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 25;
+				CURRENT_PROJECT_VERSION = 26;
 				DEVELOPMENT_TEAM = L4T783637F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -488,7 +492,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.4.0;
+				MARKETING_VERSION = 0.4.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.AppDimmer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -505,7 +509,7 @@
 				CODE_SIGN_ENTITLEMENTS = AppDimmer/AppDimmer.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 25;
+				CURRENT_PROJECT_VERSION = 26;
 				DEVELOPMENT_TEAM = L4T783637F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -519,7 +523,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.4.0;
+				MARKETING_VERSION = 0.4.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lihaoyun6.AppDimmer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -560,6 +564,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		18848DBB28A3ACBB00464138 /* XCRemoteSwiftPackageReference "HotKey" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/soffes/HotKey";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		188A0E2C281984FE00ED08BF /* XCRemoteSwiftPackageReference "AXSwift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/tmandry/AXSwift";
@@ -571,6 +583,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		18848DBC28A3ACBB00464138 /* HotKey */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 18848DBB28A3ACBB00464138 /* XCRemoteSwiftPackageReference "HotKey" */;
+			productName = HotKey;
+		};
 		188A0E2D281984FE00ED08BF /* AXSwift */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 188A0E2C281984FE00ED08BF /* XCRemoteSwiftPackageReference "AXSwift" */;

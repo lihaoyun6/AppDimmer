@@ -7,6 +7,7 @@
 
 import Cocoa
 import AXSwift
+import HotKey
 import ServiceManagement
 
 //扩展本地化字符串功能
@@ -32,11 +33,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var observer: Any!
     var timer: Timer?
     var pids = [Int: String]()
-    var fps = UserDefaults.standard.integer(forKey: "fps")
-    var level = UserDefaults.standard.integer(forKey: "level")
+    var fps = (UserDefaults.standard.object(forKey: "fps") ?? 15) as! Int
+    var level = (UserDefaults.standard.object(forKey: "level") ?? 30) as! Int
     var disable = UserDefaults.standard.bool(forKey: "disable")
-    var darkOnly = UserDefaults.standard.bool(forKey: "darkOnly")
+    var darkOnly = (UserDefaults.standard.object(forKey: "darkOnly") ?? true) as! Bool
     var allowShot = UserDefaults.standard.bool(forKey: "allowShot")
+    var xRayMode = UserDefaults.standard.string(forKey: "xRayMode") ?? "down"
     var appList = (UserDefaults.standard.array(forKey: "appList") ?? []) as! [String]
     var lazyList = (UserDefaults.standard.array(forKey: "lazyList") ?? []) as! [String]
     var invList = (UserDefaults.standard.array(forKey: "invList") ?? []) as! [String]
@@ -45,13 +47,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var unStandardWindows = [Array<Any>]()
     var fullScreenWindows = [NSRect]()
     var statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.variableLength)
+    let xRayKey = HotKey(key: .grave, modifiers: [.option])
     var fApp = ""
+    var xRay = false
     var foundHelper = false
-    let menu = NSMenu()
     let helperBundleName = "com.lihaoyun6.AppDimmerLoginHelper"
     let subRoleBlackList = ["AXSystemDialog"]
     let levelWhiteList = [0,1,3,8,20,1000]
     let levelBlackList = [24,25,500]
+    let menu = NSMenu()
     /*
      kCGBackstopMenuLevel = -20
      kCGNormalWindowLevel = 0
@@ -71,14 +75,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
      */
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        //初始化设定
-        if level == 0{
-            level = 30
-            darkOnly = true
-            UserDefaults.standard.set(level, forKey: "level")
-            UserDefaults.standard.set(darkOnly, forKey: "darkOnly")
-        }
-        if fps == 0 { fps = 15 ; UserDefaults.standard.set(fps, forKey: "fps") }
         //检查辅助功能权限
         _ = UIElement.isProcessTrusted(withPrompt: true)
         //获取自启代理状态
@@ -88,11 +84,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menuIcon()
         menuWillOpen(menu)
         if !disable { isDarkMode() }
+        xRayKey.isPaused = (xRayMode == "off")
         
         //创建事件侦听
         //NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(sleepListener(_:)), name: NSWorkspace.willSleepNotification, object: nil)
         //NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(sleepListener(_:)), name: NSWorkspace.didWakeNotification, object: nil)
         observer = NSApp.observe(\.effectiveAppearance) { _, _ in self.isDarkMode() }
+        xRayKey.keyDownHandler = { self.xRay = true }
+        xRayKey.keyUpHandler = { self.xRay = false }
     }
     
     func applicationWillTerminate(_ aNotification: Notification) {
@@ -160,6 +159,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         myPopup.alertStyle = NSAlert.Style.warning
         myPopup.addButton(withTitle: button)
         return myPopup.runModal() == NSApplication.ModalResponse.alertFirstButtonReturn
+    }
+    
+    //设置"透视模式"
+    @objc func setxRayMode(_ sender: NSMenuItem) {
+        xRayKey.isPaused = false
+        switch sender.title {
+        case "停用".local:
+            xRayMode = "off"
+            xRayKey.isPaused = true
+        case "完全隐藏".local:
+            xRayMode = "close"
+        default:
+            xRayMode = "down"
+        }
+        UserDefaults.standard.set(xRayMode, forKey: "xRayMode")
     }
     
     //设置刷新率
@@ -269,6 +283,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.removeAllItems()
         let options = NSMenu()
         let chooseFps = NSMenu()
+        let xRayMenu = NSMenu()
         menu.delegate = self
         menu.autoenablesItems = false
         let Switch = menu.addItem(withTitle: "\(fApp): \(getEnableText(fApp))", action: #selector(editAppList(_:)), keyEquivalent: "")
@@ -286,6 +301,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         options.addItem(NSMenuItem.separator())
         options.addItem(withTitle: "跟随系统主题".local, action: #selector(setDarkOnly(_:)), keyEquivalent: "").state = state(darkOnly)
         options.addItem(withTitle: "在截图中显示".local, action: #selector(setallowShot(_:)), keyEquivalent: "").state = state(allowShot)
+        options.addItem(NSMenuItem.separator())
+        options.setSubmenu(xRayMenu, for: options.addItem(withTitle: "透视模式...".local, action: nil, keyEquivalent: ""))
+        xRayMenu.addItem(withTitle: "停用".local, action: #selector(setxRayMode(_:)), keyEquivalent: "").state = state(xRayMode == "off")
+        xRayMenu.addItem(withTitle: "降级显示".local, action: #selector(setxRayMode(_:)), keyEquivalent: "").state = state(xRayMode == "down")
+        xRayMenu.addItem(withTitle: "完全隐藏".local, action: #selector(setxRayMode(_:)), keyEquivalent: "").state = state(xRayMode == "close")
         options.setSubmenu(chooseFps, for: options.addItem(withTitle: "刷新率...".local, action: nil, keyEquivalent: ""))
         chooseFps.addItem(withTitle: "60FPS", action: #selector(setFPS(_:)), keyEquivalent: "")
         chooseFps.addItem(withTitle: "30FPS", action: #selector(setFPS(_:)), keyEquivalent: "")
@@ -433,7 +453,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let owner = getOwner(w)
             let number = getNumber(w)
             var layer = getLayer(w)
-            if i == 0 && frontVisibleAppName == owner { layer += 1 }
+            if i == 0 && !xRay && frontVisibleAppName == owner { layer += 1 }
             var mask: NSWindow!
             if i+1 > mc {
                 mask = NNSWindow(contentRect: .init(origin: .zero, size: .init(width: 0, height: 0)), styleMask: .titled, backing: .buffered, defer: false)
@@ -443,28 +463,28 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             mask.level = NSWindow.Level.init(rawValue: layer)
             mask.collectionBehavior = [.transient, .ignoresCycle]
             mask.backgroundColor = NSColor(white: 0.0, alpha: CGFloat(level)/100)
+            if !invList.contains(owner) && xRay && i == 0 && xRayMode == "down" { mask.styleMask = .borderless; mask.backgroundColor = NSColor(white: 0.0, alpha: 0.0);continue }
             mask.isOpaque = false
             mask.hasShadow = false
             mask.ignoresMouseEvents = true
             mask.isReleasedWhenClosed = false
             mask.titlebarAppearsTransparent = true
             if allowShot { mask.sharingType = .readOnly } else { mask.sharingType = .none }
-            if isFullScreen(bound) {
-                mask.styleMask = .borderless
-            } else if invList.contains(owner) {
+            if invList.contains(owner) && !(xRay && i == 0 && xRayMode == "down"){
                 let windowImage: CGImage? = CGWindowListCreateImage(.null, .optionIncludingWindow, CGWindowID(number), [.boundsIgnoreFraming, .bestResolution])
                 if let image = windowImage {
                     mask.styleMask = .fullSizeContentView
                     mask.contentView = NSImageView(image: NSImage(cgImage: image, size: .zero))
-                    mask.contentView?.contentFilters = [CIFilter(name: "CILinearToSRGBToneCurve")!,CIFilter(name: "CIHueAdjust",parameters: [kCIInputAngleKey: Float(1.0 * Double.pi)])!]
+                    mask.contentView?.contentFilters = [CIFilter(name: "CILinearToSRGBToneCurve")!,CIFilter(name: "CIHueAdjust",parameters: [kCIInputAngleKey: Float(Double.pi)])!]
                     mask.contentView?.compositingFilter = CIFilter(name: "CIColorInvert")
                 }
             } else {
-                mask.styleMask = .titled
-                mask.contentView = nil
+                if isFullScreen(bound) { mask.styleMask = .borderless } else { mask.styleMask = .titled }
+                if mask.contentView?.compositingFilter != nil { mask.contentView = nil }
             }
             mask.setFrame(bound, display: true)
             mask.order(.above, relativeTo: number)
+            //if xRay && i == 0 { mask.contentView = nil }
             //mask.makeKeyAndOrderFront(self)
         }
     }
@@ -504,6 +524,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     //appWindows.append(w)
                 }
             }
+            if xRay && xRayMode == "close" && appWindows.count > 0 { appWindows.removeFirst() }
             createMask(appWindows)
         } else {
             alert("出现错误".local, "无法获取窗口列表!".local, "退出".local)
