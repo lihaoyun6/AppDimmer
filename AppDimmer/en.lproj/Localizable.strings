@@ -6,20 +6,21 @@
   
 */
 "登录时启动" = "Launch at Login";
-"跟随系统主题" = "Follow System Theme";
-"在截图中显示" = "Show in Screenshot";
-"刷新率..." = "Refresh Rate...";
+"跟随系统外观" = "Follow System Theme";
+"截图时隐藏" = "Hide on Screenshot";
+"遮罩刷新率..." = "Refresh Rate...";
 "关于 AppDimmer" = "About AppDimmer";
 "退出" = "Quit";
 "出现错误" = "Unknown Error";
 "无法获取窗口列表!" = "Unable to get windows list!";
 "偏好设置..." = "Preferences...";
-"窗口筛选器" = "Layout Analyzer";
+"过滤复杂窗口" = "Layout Analysis";
 "反转颜色" = "Invert Colors";
 "亮度: " = "Brightness: ";
 "已启用" = "Enabled";
 "未启用" = "Disabled";
-"透视模式..." = "X-ray Mode...";
-"停用" = "Disable";
-"降级显示" = "Fallback";
-"完全隐藏" = "Disappear";
+"透视键 [⇧⇥]" = "xRay Hotkey [⇧⇥]";
+//"顶层透视..." = "Boss Key Function...";
+//"停用透视键" = "Disable Boss Key";
+//"切换遮盖方式" = "Toggle Mask Type";
+//"直接隐藏遮罩" = "Hide The Mask";

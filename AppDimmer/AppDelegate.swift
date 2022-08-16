@@ -38,7 +38,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var disable = UserDefaults.standard.bool(forKey: "disable")
     var darkOnly = (UserDefaults.standard.object(forKey: "darkOnly") ?? true) as! Bool
     var allowShot = UserDefaults.standard.bool(forKey: "allowShot")
-    var xRayMode = UserDefaults.standard.string(forKey: "xRayMode") ?? "down"
+    var xRayMode = "down"//UserDefaults.standard.string(forKey: "xRayMode") ?? "down"
+    var xRayOn = (UserDefaults.standard.object(forKey: "xRayOn") ?? true) as! Bool
     var appList = (UserDefaults.standard.array(forKey: "appList") ?? []) as! [String]
     var lazyList = (UserDefaults.standard.array(forKey: "lazyList") ?? []) as! [String]
     var invList = (UserDefaults.standard.array(forKey: "invList") ?? []) as! [String]
@@ -47,7 +48,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var unStandardWindows = [Array<Any>]()
     var fullScreenWindows = [NSRect]()
     var statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.variableLength)
-    let xRayKey = HotKey(key: .grave, modifiers: [.option])
+    let xRayKey = HotKey(key: .tab, modifiers: [.shift])
     var fApp = ""
     var xRay = false
     var foundHelper = false
@@ -84,7 +85,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menuIcon()
         menuWillOpen(menu)
         if !disable { isDarkMode() }
-        xRayKey.isPaused = (xRayMode == "off")
+        xRayKey.isPaused = !xRayOn
         
         //创建事件侦听
         //NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(sleepListener(_:)), name: NSWorkspace.willSleepNotification, object: nil)
@@ -165,10 +166,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc func setxRayMode(_ sender: NSMenuItem) {
         xRayKey.isPaused = false
         switch sender.title {
-        case "停用".local:
+        case "停用透视键".local:
             xRayMode = "off"
             xRayKey.isPaused = true
-        case "完全隐藏".local:
+        case "直接隐藏遮罩".local:
             xRayMode = "close"
         default:
             xRayMode = "down"
@@ -194,7 +195,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     //设置"截屏时显示"
     @objc func setallowShot(_ sender: NSMenuItem) {
         allowShot.toggle()
-        sender.state = state(allowShot)
+        sender.state = state(!allowShot)
         UserDefaults.standard.set(allowShot, forKey: "allowShot")
     }
     
@@ -248,6 +249,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         sender.state = state(foundHelper)
     }
     
+    //设置启用透视快捷键
+    @objc func setxRayOn(_ sender: NSMenuItem) {
+        xRayOn.toggle()
+        sender.state = state(xRayOn)
+        UserDefaults.standard.set(xRayOn, forKey: "xRayOn")
+    }
+    
     //菜单栏按钮左右键响应
     @objc func statusBarButtonClicked(_ sender: NSStatusBarButton) {
         let event = NSApp.currentEvent!
@@ -287,7 +295,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.delegate = self
         menu.autoenablesItems = false
         let Switch = menu.addItem(withTitle: "\(fApp): \(getEnableText(fApp))", action: #selector(editAppList(_:)), keyEquivalent: "")
-        let lazyMode = NSMenuItem(title: "窗口筛选器".local, action: #selector(editLayzList(_:)), keyEquivalent: "")
+        let lazyMode = NSMenuItem(title: "过滤复杂窗口".local, action: #selector(editLayzList(_:)), keyEquivalent: "")
         let invMode = NSMenuItem(title: "反转颜色".local, action: #selector(editInvList(_:)), keyEquivalent: "")
         lazyMode.isEnabled = enable && !invList.contains(fApp)
         invMode.isEnabled = enable
@@ -299,14 +307,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.setSubmenu(options, for: menu.addItem(withTitle: "偏好设置...".local, action: nil, keyEquivalent: ""))
         options.addItem(withTitle: "登录时启动".local, action: #selector(setRunAtLogin(_:)), keyEquivalent: "").state = state(foundHelper)
         options.addItem(NSMenuItem.separator())
-        options.addItem(withTitle: "跟随系统主题".local, action: #selector(setDarkOnly(_:)), keyEquivalent: "").state = state(darkOnly)
-        options.addItem(withTitle: "在截图中显示".local, action: #selector(setallowShot(_:)), keyEquivalent: "").state = state(allowShot)
+        options.addItem(withTitle: "跟随系统外观".local, action: #selector(setDarkOnly(_:)), keyEquivalent: "").state = state(darkOnly)
+        options.addItem(withTitle: "截图时隐藏".local, action: #selector(setallowShot(_:)), keyEquivalent: "").state = state(!allowShot)
+        options.addItem(withTitle: "透视键 [⇧⇥]".local, action: #selector(setxRayOn(_:)), keyEquivalent: "").state = state(xRayOn)
         options.addItem(NSMenuItem.separator())
-        options.setSubmenu(xRayMenu, for: options.addItem(withTitle: "透视模式...".local, action: nil, keyEquivalent: ""))
-        xRayMenu.addItem(withTitle: "停用".local, action: #selector(setxRayMode(_:)), keyEquivalent: "").state = state(xRayMode == "off")
-        xRayMenu.addItem(withTitle: "降级显示".local, action: #selector(setxRayMode(_:)), keyEquivalent: "").state = state(xRayMode == "down")
-        xRayMenu.addItem(withTitle: "完全隐藏".local, action: #selector(setxRayMode(_:)), keyEquivalent: "").state = state(xRayMode == "close")
-        options.setSubmenu(chooseFps, for: options.addItem(withTitle: "刷新率...".local, action: nil, keyEquivalent: ""))
+        //options.setSubmenu(xRayMenu, for: options.addItem(withTitle: "顶层透视...".local, action: nil, keyEquivalent: ""))
+        //xRayMenu.addItem(withTitle: "停用透视键".local, action: #selector(setxRayMode(_:)), keyEquivalent: "").state = state(xRayMode == "off")
+        //xRayMenu.addItem(NSMenuItem.separator())
+        //xRayMenu.addItem(withTitle: "切换遮盖方式".local, action: #selector(setxRayMode(_:)), keyEquivalent: "").state = state(xRayMode == "down")
+        //xRayMenu.addItem(withTitle: "直接隐藏遮罩".local, action: #selector(setxRayMode(_:)), keyEquivalent: "").state = state(xRayMode == "close")
+        options.setSubmenu(chooseFps, for: options.addItem(withTitle: "遮罩刷新率...".local, action: nil, keyEquivalent: ""))
         chooseFps.addItem(withTitle: "60FPS", action: #selector(setFPS(_:)), keyEquivalent: "")
         chooseFps.addItem(withTitle: "30FPS", action: #selector(setFPS(_:)), keyEquivalent: "")
         chooseFps.addItem(withTitle: "15FPS", action: #selector(setFPS(_:)), keyEquivalent: "")
@@ -320,7 +330,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let view = NSView.init(frame: NSRect(x: 0, y: 0, width: menu.size.width, height: 32))
         view.addSubview(menuSlider)
         menuSlider.sliderType = NSSlider.SliderType.linear
-        menuSlider.isEnabled = enable && !invList.contains(fApp)
+        menuSlider.isEnabled = enable && (!invList.contains(fApp) || (invList.contains(fApp) && xRay))
         menuSlider.isContinuous = true
         menuSlider.action = #selector(sliderValueChanged(_:))
         menuSlider.minValue = 10
@@ -442,12 +452,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     //批量生成遮罩窗体
-    func createMask(_ appWindows: [Dictionary<String, AnyObject>]){
+    func createMask(_ appWindows: [Dictionary<String, AnyObject>], _ validAppWindows: [NSRect]){
         let frontVisibleAppName = getAppName(NSWorkspace.shared.frontmostApplication?.bundleURL)
         let maskList = windows()
         let mc = maskList.count
         let n = appWindows.count - mc
-        if n<0 { for i in 1...abs(n) {maskList[mc-i].close()} }
+        if n<0 {
+            for i in 1...abs(n) {maskList[mc-i].close()}
+            maskList[0].contentView = nil
+            //if appWindows.filter({ getOwner($0) == frontVisibleAppName }).count < 2 { xRay = false }
+        }
+        var top: Int
+        if appWindows.count>0 && getBound(appWindows[0]).size.height < 40 { top = 1 } else { top = 0 }
         for (i,w) in appWindows.enumerated(){
             let bound = getBound(w)
             let owner = getOwner(w)
@@ -463,20 +479,22 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             mask.level = NSWindow.Level.init(rawValue: layer)
             mask.collectionBehavior = [.transient, .ignoresCycle]
             mask.backgroundColor = NSColor(white: 0.0, alpha: CGFloat(level)/100)
-            if !invList.contains(owner) && xRay && i == 0 && xRayMode == "down" { mask.styleMask = .borderless; mask.backgroundColor = NSColor(white: 0.0, alpha: 0.0);continue }
+            if !invList.contains(owner) && xRay && i == top { mask.styleMask = .borderless; mask.backgroundColor = NSColor(white: 0.0, alpha: 0.0);continue }
             mask.isOpaque = false
             mask.hasShadow = false
             mask.ignoresMouseEvents = true
             mask.isReleasedWhenClosed = false
             mask.titlebarAppearsTransparent = true
             if allowShot { mask.sharingType = .readOnly } else { mask.sharingType = .none }
-            if invList.contains(owner) && !(xRay && i == 0 && xRayMode == "down"){
+            if invList.contains(owner) && !(xRay && i == top && validAppWindows.contains(bound)){
                 let windowImage: CGImage? = CGWindowListCreateImage(.null, .optionIncludingWindow, CGWindowID(number), [.boundsIgnoreFraming, .bestResolution])
                 if let image = windowImage {
                     mask.styleMask = .fullSizeContentView
                     mask.contentView = NSImageView(image: NSImage(cgImage: image, size: .zero))
-                    mask.contentView?.contentFilters = [CIFilter(name: "CILinearToSRGBToneCurve")!,CIFilter(name: "CIHueAdjust",parameters: [kCIInputAngleKey: Float(Double.pi)])!]
-                    mask.contentView?.compositingFilter = CIFilter(name: "CIColorInvert")
+                    if validAppWindows.contains(bound) || !xRay || i != top{
+                        mask.contentView?.contentFilters = [CIFilter(name: "CILinearToSRGBToneCurve")!, CIFilter(name: "CIHueAdjust",parameters: [kCIInputAngleKey: Float(Double.pi)])!]
+                        mask.contentView?.compositingFilter = CIFilter(name: "CIColorInvert")
+                    }
                 }
             } else {
                 if isFullScreen(bound) { mask.styleMask = .borderless } else { mask.styleMask = .titled }
@@ -493,6 +511,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc func loopFireHandler(_ timer: Timer?) -> Void {
         //声明窗口区域列表
         var appWindows = [[String: AnyObject]]()
+        var validAppWindows = [NSRect]()
         //检测当前屏幕上所有的可见窗口
         if let windowList = CGWindowListCopyWindowInfo([.excludeDesktopElements,.optionOnScreenOnly], kCGNullWindowID) as? [[String: AnyObject]] {
             let mc: [String] = windowList.filter{ getOwner($0) == "SystemUIServer" }.map{ NSStringFromRect(getBound($0)) }
@@ -505,10 +524,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             for w in windowInAppList {
                 //获取窗口基本信息
                 let owner = getOwner(w)
-                if lazyList.contains(owner) || invList.contains(owner) { appWindows.append(w); continue }
                 let layer = getLayer(w)
                 let bound = getBound(w)
-                if levelBlackList.contains(layer) || bound.size.height < 50{ continue }
+                let flag = lazyList.contains(owner) || invList.contains(owner)
+                if flag { appWindows.append(w) }
+                if levelBlackList.contains(layer) || bound.size.height < 50 { continue }
                 let attribs = unStandardWindows.filter{ $0.first as! String == owner && $0.last as! CGSize == bound.size }
                 if attribs.count != 0 {
                     if isFullScreen(bound) { appWindows.append(w); continue }
@@ -516,16 +536,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     let subrole = attribs.first?[2] as! String
                     if (layer == 0 && subrole == "AXUnknown") {
                         let c = windowInAppList.filter{ let b = getBound($0); return getOwner($0) == owner && b != bound && NSContainsRect(b, bound) }
-                        if c.count < 1 { appWindows.append(w) }
+                        if c.count < 1 { if !flag { appWindows.append(w) } else { validAppWindows.append(bound) } }
                     } else if !subRoleBlackList.contains(subrole) && childen > 0 {
-                        appWindows.append(w)
+                        if !flag { appWindows.append(w) } else { validAppWindows.append(bound) }
                     }
                 }else{
                     //appWindows.append(w)
                 }
             }
             if xRay && xRayMode == "close" && appWindows.count > 0 { appWindows.removeFirst() }
-            createMask(appWindows)
+            createMask(appWindows, validAppWindows)
         } else {
             alert("出现错误".local, "无法获取窗口列表!".local, "退出".local)
             NSApplication.shared.terminate(self)
